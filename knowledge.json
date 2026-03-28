@@ -1,0 +1,929 @@
+{
+  "knowledge_base_name": "AIGC 提示词",
+  "categories": [
+    {
+      "category": "人物·写实人像",
+      "core_rules": [
+        "皮肤：毛孔、细纹、油光、雀斑、痘印、肤色不均、自然泛红",
+        "光影：侧光、硬光、局部阴影、明暗对比、环境反光",
+        "镜头：胶片颗粒、色散、动态模糊、轻微漏光、边缘柔化",
+        "状态：头发杂乱、发丝飞散、衣服褶皱、微表情、自然姿态",
+        "禁止：完美、光滑、无瑕疵、塑料感、对称脸、过度磨皮、CGI"
+      ],
+      "prompt_template": "photorealistic, raw photo, 8K, Fujifilm X-T5, film grain, natural skin texture, pores, subtle imperfections, side lighting, hard light, realistic shadow, natural expression, messy hair, dynamic, slight motion blur, chromatic aberration",
+      "negative_prompt": "perfect skin, smooth, plastic, symmetrical face, over-smooth, CGI, 3D render, illustration, cartoon, anime, over-saturated, blurry, airbrushed, fake, no pores"
+    },
+    {
+      "category": "人物·街拍纪实",
+      "core_rules": [
+        "抓拍感：自然瞬间、动态、不摆拍、生活化",
+        "环境：真实街道、路人、市井气息、杂乱背景",
+        "光影：街头自然光、逆光、眩光、阴影强烈",
+        "质感：胶片颗粒、高对比、轻微噪点、纪实感",
+        "禁止：摆拍、完美、干净、精致、过度美化"
+      ],
+      "prompt_template": "street photography, candid shot, raw photo, documentary style, natural moment, dynamic, urban background, pedestrians, strong contrast, backlight, lens flare, film grain, high ISO, gritty texture",
+      "negative_prompt": "posed, perfect, clean, polished, over-smooth, fake, CGI, illustration, cartoon, airbrushed, static"
+    },
+    {
+      "category": "人物·情绪肖像",
+      "core_rules": [
+        "情绪：忧郁、温柔、坚定、迷茫、沉思、脆弱",
+        "光影：柔光、侧逆光、低饱和、氛围感、暗调",
+        "细节：眼神、微表情、皮肤质感、发丝、情绪张力",
+        "氛围：安静、孤独、故事感、留白、情绪氛围",
+        "禁止：明亮、开心、夸张、过度美颜、无情绪"
+      ],
+      "prompt_template": "emotional portrait, moody lighting, soft side light, backlight, low saturation, quiet atmosphere, storytelling, subtle expression, eye detail, film grain, shallow depth of field, intimate",
+      "negative_prompt": "bright, happy, exaggerated, over-smoothed, fake, CGI, cartoon, bright background, no emotion"
+    },
+    {
+      "category": "人物·古风汉服",
+      "core_rules": [
+        "服饰：真实布料、褶皱、刺绣、垂坠感、自然纹理",
+        "发型：真实发丝、发簪、凌乱感、不完美",
+        "光影：古风庭院、柔光、雾感、暖调、黄昏",
+        "环境：园林、亭台、石板路、青苔、古典建筑",
+        "禁止：塑料布料、完美发型、卡通、CGI、现代元素"
+      ],
+      "prompt_template": "photorealistic, Hanfu, traditional Chinese clothing, realistic fabric texture, natural folds, embroidery details, messy hairpin, ancient garden, soft misty light, warm golden hour, stone path, moss, aged architecture",
+      "negative_prompt": "plastic fabric, perfect hair, cartoon, CGI, modern elements, illustration, smooth, fake"
+    },
+    {
+      "category": "人物·儿童纯真",
+      "core_rules": [
+        "皮肤：细腻但真实、轻微泛红、自然光泽",
+        "表情：天真、好奇、自然笑容、不僵硬",
+        "光影：柔和自然光、窗边光、暖调、无硬阴影",
+        "状态：动态、奔跑、玩耍、自然姿态、不摆拍",
+        "禁止：过度磨皮、成人化、精致、摆拍、假笑"
+      ],
+      "prompt_template": "child portrait, innocent expression, natural smile, soft window light, warm tone, realistic skin, dynamic movement, playing, candid, film grain, gentle shadow",
+      "negative_prompt": "over-smoothed, adult-like, posed, fake smile, CGI, cartoon, bright overexposed"
+    },
+    {
+      "category": "人物·男性硬朗",
+      "core_rules": [
+        "面部：轮廓分明、胡茬、皮肤纹理、硬朗线条",
+        "光影：硬光、侧光、高对比、阴影强烈、力量感",
+        "气质：坚毅、沉稳、冷峻、成熟、故事感",
+        "质感：胶片颗粒、高对比、轻微噪点、纪实",
+        "禁止：柔美、光滑、精致、过度磨皮、阴柔"
+      ],
+      "prompt_template": "male portrait, strong facial features, stubble, hard side light, high contrast, dramatic shadow, determined expression, film grain, gritty texture, mature atmosphere",
+      "negative_prompt": "soft, smooth, delicate, over-smoothed, feminine, CGI, cartoon, bright"
+    },
+    {
+      "category": "风景·江南水乡",
+      "core_rules": [
+        "建筑：白墙黑瓦、风化、水渍、青苔、老旧、斑驳",
+        "水面：波纹、涟漪、扭曲倒影、湿润感、微澜",
+        "植物：垂柳、杂草、枯枝、自然生长、不修剪",
+        "氛围：烟雨、雾气、阴天、漫射光、湿润空气",
+        "禁止：完美对称、镜面倒影、崭新、干净、水墨、插画"
+      ],
+      "prompt_template": "photorealistic, Jiangnan water town, misty rainy day, aged white walls with water stains, weathered black tiles, moss on stone bridge, rippling water with distorted reflections, wild weeping willow, overcast, soft diffused light, atmospheric perspective",
+      "negative_prompt": "perfect reflection, symmetrical, clean walls, new tiles, plastic texture, illustration, ink wash, 3D render, CGI, no moss, no water marks"
+    },
+    {
+      "category": "风景·森林秘境",
+      "core_rules": [
+        "植被：茂密、杂乱、苔藓、腐叶、自然生长",
+        "光影：丁达尔光、穿透树叶、光斑、柔光、雾感",
+        "地面：落叶、泥土、树根、潮湿、凹凸不平",
+        "氛围：神秘、幽静、原始、自然、空气湿润",
+        "禁止：整齐、干净、人造、塑料感、明亮刺眼"
+      ],
+      "prompt_template": "deep forest, misty atmosphere, sunbeams through leaves, dappled light, mossy trees, fallen leaves, wet ground, roots, wild vegetation, atmospheric perspective, soft light, mysterious",
+      "negative_prompt": "neat, clean, man-made, plastic, bright, over-saturated, cartoon, illustration"
+    },
+    {
+      "category": "风景·海边日出",
+      "core_rules": [
+        "海面：波浪、泡沫、反光、动态、不平静",
+        "天空：渐变、云层、霞光、真实色彩、不完美",
+        "沙滩：湿沙、脚印、贝壳、碎石、自然痕迹",
+        "光影：低角度、暖调、逆光、强烈反光、氛围",
+        "禁止：镜面海、完美天空、干净沙滩、塑料感"
+      ],
+      "prompt_template": "seascape, sunrise, low angle sunlight, warm glow, ocean waves, foam, wet sand, footprints, clouds, sky gradient, realistic reflection, atmospheric haze",
+      "negative_prompt": "perfect sea, smooth water, clean sand, plastic, bright overexposed, cartoon, illustration"
+    },
+    {
+      "category": "风景·雪山冰川",
+      "core_rules": [
+        "冰雪：纹理、裂缝、冰棱、积雪、自然堆积",
+        "光影：冷调、强烈反光、阴影、高对比、寒冷感",
+        "环境：岩石、碎石、稀薄空气、远景模糊、雾感",
+        "氛围：壮丽、寒冷、纯净、荒凉、自然力量",
+        "禁止：光滑冰面、完美雪山、人造、塑料感"
+      ],
+      "prompt_template": "snow mountain, glacier, ice cracks, snow texture, cold tone, strong reflection, high contrast, rocky terrain, atmospheric haze, distant blur, majestic, wild nature",
+      "negative_prompt": "smooth ice, perfect mountain, man-made, plastic, bright, cartoon, illustration"
+    },
+    {
+      "category": "风景·沙漠戈壁",
+      "core_rules": [
+        "沙丘：纹理、风痕、起伏、自然线条、不完美",
+        "光影：强烈日照、硬阴影、暖调、干燥感",
+        "地面：碎石、沙粒、干枯植物、荒凉、空旷",
+        "氛围：辽阔、孤独、炎热、寂静、自然力量",
+        "禁止：整齐、湿润、绿色、人造、塑料感"
+      ],
+      "prompt_template": "desert landscape, sand dunes, wind patterns, harsh sunlight, strong shadow, warm dry tone, rocky ground, dry plants, vast emptiness, atmospheric perspective, wild",
+      "negative_prompt": "neat, wet, green, man-made, plastic, bright overexposed, cartoon"
+    },
+    {
+      "category": "风景·梯田田园",
+      "core_rules": [
+        "梯田：自然曲线、泥土、作物、水痕、不规整",
+        "光影：漫射光、阴天、柔和、层次、自然色彩",
+        "环境：村庄、小路、树木、农舍、真实乡村",
+        "氛围：宁静、质朴、生活气息、自然、温暖",
+        "禁止：完美线条、干净、人造、塑料感、插画"
+      ],
+      "prompt_template": "rice terraces, natural curves, earth texture, crops, soft overcast light, rural village, dirt path, farmhouse, peaceful atmosphere, realistic color, film grain",
+      "negative_prompt": "perfect lines, clean, man-made, plastic, illustration, cartoon, bright"
+    },
+    {
+      "category": "风景·城市夜景",
+      "core_rules": [
+        "灯光：霓虹、光斑、虚化、反光、真实街灯",
+        "建筑：玻璃反光、窗户、老旧、真实城市肌理",
+        "街道：车流、行人、路面湿滑、雨水反光",
+        "光影：暗调、高对比、眩光、氛围感、都市感",
+        "禁止：干净、明亮、无噪点、完美、塑料感"
+      ],
+      "prompt_template": "city night scene, neon lights, bokeh, wet pavement, rain reflection, car light trails, building glass reflection, dark tone, high contrast, lens flare, urban atmosphere, film grain",
+      "negative_prompt": "clean, bright, no noise, perfect, plastic, cartoon, illustration, over-smooth"
+    },
+    {
+      "category": "风景·古镇老街",
+      "core_rules": [
+        "街道：石板路、磨损、裂缝、杂物、生活痕迹",
+        "建筑：老旧、斑驳、招牌、门窗、岁月痕迹",
+        "氛围：烟火气、市井、潮湿、阴天、漫射光",
+        "细节：行人、店铺、自行车、自然杂乱",
+        "禁止：崭新、干净、整齐、完美、插画、水墨"
+      ],
+      "prompt_template": "ancient town street, worn stone pavement, aged buildings, faded signs, daily life traces, overcast light, misty atmosphere, pedestrians, bicycles, realistic texture, film grain",
+      "negative_prompt": "new, clean, neat, perfect, illustration, ink wash, plastic, cartoon"
+    },
+    {
+      "category": "建筑·中式古建",
+      "core_rules": [
+        "结构：飞檐、斗拱、木构、风化、磨损、真实纹理",
+        "墙面：斑驳、水渍、青苔、老旧、岁月痕迹",
+        "光影：庭院光、漫射、柔和、阴影、层次",
+        "氛围：宁静、古朴、历史感、禅意、自然",
+        "禁止：崭新、光滑、完美、塑料感、现代元素"
+      ],
+      "prompt_template": "traditional Chinese architecture, flying eaves, wooden structure, weathered texture, aged walls, moss, courtyard light, soft shadow, historical atmosphere, peaceful, realistic detail",
+      "negative_prompt": "new, smooth, perfect, plastic, modern elements, cartoon, illustration"
+    },
+    {
+      "category": "建筑·欧式复古",
+      "core_rules": [
+        "细节：浮雕、石材、磨损、斑驳、岁月痕迹",
+        "光影：暖调、黄昏、逆光、柔和、氛围",
+        "街道：石板路、路灯、店铺、复古元素",
+        "氛围：怀旧、浪漫、复古、故事感",
+        "禁止：崭新、干净、现代、塑料感、CGI"
+      ],
+      "prompt_template": "European retro architecture, stone relief, weathered texture, warm golden hour, backlight, vintage street lamp, cobblestone road, nostalgic atmosphere, romantic, realistic detail",
+      "negative_prompt": "new, clean, modern, plastic, CGI, cartoon, illustration, bright"
+    },
+    {
+      "category": "建筑·现代极简",
+      "core_rules": [
+        "线条：简洁、干净但真实、材质纹理、不完美",
+        "光影：硬光、高对比、阴影、几何感、冷峻",
+        "材质：混凝土、玻璃、金属、真实质感",
+        "氛围：冷静、简约、高级、空旷、现代",
+        "禁止：杂乱、装饰、复古、塑料感、插画"
+      ],
+      "prompt_template": "modern minimalist architecture, clean lines, concrete texture, glass reflection, hard light, high contrast, geometric shadow, calm atmosphere, spacious, realistic material",
+      "negative_prompt": "cluttered, decorated, retro, plastic, cartoon, illustration, over-saturated"
+    },
+    {
+      "category": "静物·美食特写",
+      "core_rules": [
+        "质感：油光、汁水、纹理、酥脆、软糯、真实",
+        "光影：侧光、反光、阴影、层次、食欲感",
+        "细节：蒸汽、碎屑、酱料、自然摆放",
+        "氛围：温暖、烟火气、真实厨房、生活化",
+        "禁止：完美摆盘、光滑、无质感、塑料感"
+      ],
+      "prompt_template": "food close-up, realistic texture, oil gloss, juice, steam, crumbs, side light, reflection, warm tone, kitchen atmosphere, natural arrangement, film grain",
+      "negative_prompt": "perfect plating, smooth, no texture, plastic, cartoon, illustration, over-saturated"
+    },
+    {
+      "category": "静物·咖啡时光",
+      "core_rules": [
+        "细节：咖啡泡沫、杯痕、蒸汽、勺子、真实摆放",
+        "光影：窗边光、柔光、暖调、阴影、氛围",
+        "环境：桌面、书籍、植物、生活化、杂乱",
+        "氛围：安静、治愈、温暖、慵懒、日常",
+        "禁止：完美、干净、精致、塑料感、CGI"
+      ],
+      "prompt_template": "coffee still life, latte foam, cup marks, steam, soft window light, warm tone, messy desk, books, plants, cozy atmosphere, realistic detail, film grain",
+      "negative_prompt": "perfect, clean, delicate, plastic, CGI, cartoon, bright overexposed"
+    },
+    {
+      "category": "静物·花艺自然",
+      "core_rules": [
+        "花朵：自然状态、轻微枯萎、花瓣纹理、不完美",
+        "光影：柔光、漫射、阴影、层次、真实色彩",
+        "容器：陶瓷、玻璃、磨损、真实质感",
+        "氛围：清新、自然、安静、治愈、生活感",
+        "禁止：完美花朵、光滑、塑料感、插画"
+      ],
+      "prompt_template": "flower arrangement, natural state, petal texture, slight wilting, soft diffused light, ceramic vase, realistic material, fresh atmosphere, quiet, film grain",
+      "negative_prompt": "perfect flower, smooth, plastic, cartoon, illustration, over-saturated"
+    },
+    {
+      "category": "静物·书籍文具",
+      "core_rules": [
+        "细节：书页、笔迹、折痕、墨水、真实使用痕迹",
+        "光影：侧光、阴影、暖调、质感、层次",
+        "摆放：自然杂乱、生活化、不刻意",
+        "氛围：安静、文艺、怀旧、学习、日常",
+        "禁止：崭新、干净、完美、塑料感、CGI"
+      ],
+      "prompt_template": "books and stationery, page texture, handwriting, creases, ink marks, side light, warm tone, messy arrangement, quiet atmosphere, realistic detail, film grain",
+      "negative_prompt": "new, clean, perfect, plastic, CGI, cartoon, bright"
+    },
+    {
+      "category": "静物·复古物件",
+      "core_rules": [
+        "质感：磨损、划痕、氧化、老旧、岁月痕迹",
+        "光影：暖调、柔光、阴影、怀旧氛围",
+        "细节：锈迹、污渍、使用痕迹、真实故事感",
+        "氛围：复古、怀旧、温暖、时光感",
+        "禁止：崭新、光滑、干净、塑料感、现代"
+      ],
+      "prompt_template": "vintage objects, worn texture, scratches, oxidation, rust marks, warm soft light, nostalgic atmosphere, time traces, realistic detail, film grain",
+      "negative_prompt": "new, smooth, clean, plastic, modern, cartoon, illustration"
+    },
+    {
+      "category": "氛围·雨天湿润",
+      "core_rules": [
+        "效果：雨水、湿面、反光、雾气、湿润空气",
+        "光影：漫射、阴天、柔和、低对比、冷调",
+        "细节：水滴、水痕、倒影、潮湿感",
+        "氛围：清冷、安静、忧郁、治愈、湿润",
+        "禁止：干燥、明亮、晴天、完美、塑料感"
+      ],
+      "prompt_template": "rainy day, wet surface, water reflection, misty air, water droplets, overcast light, soft diffused tone, cold atmosphere, quiet, realistic wet texture",
+      "negative_prompt": "dry, bright, sunny, perfect, plastic, cartoon, illustration"
+    },
+    {
+      "category": "氛围·雾天朦胧",
+      "core_rules": [
+        "效果：雾气、朦胧、远景模糊、空气透视",
+        "光影：柔和、低对比、漫射、无硬阴影",
+        "氛围：神秘、幽静、空灵、安静、诗意",
+        "禁止：清晰、明亮、锐利、干燥、完美"
+      ],
+      "prompt_template": "foggy atmosphere, misty, distant blur, atmospheric perspective, soft diffused light, low contrast, mysterious, quiet, poetic, realistic haze",
+      "negative_prompt": "sharp, bright, clear, dry, perfect, cartoon, illustration"
+    },
+    {
+      "category": "氛围·黄昏暖调",
+      "core_rules": [
+        "光影：低角度、暖金、逆光、眩光、柔和",
+        "色彩：暖橙、金黄、渐变、自然色彩",
+        "氛围：温柔、治愈、浪漫、宁静、时光感",
+        "禁止：冷调、明亮、硬光、高对比、刺眼"
+      ],
+      "prompt_template": "golden hour, warm sunset glow, backlight, lens flare, soft light, orange sky gradient, gentle atmosphere, romantic, peaceful, realistic color",
+      "negative_prompt": "cold tone, bright, hard light, high contrast, harsh, cartoon"
+    },
+    {
+      "category": "氛围·深夜暗调",
+      "core_rules": [
+        "光影：暗调、局部光、高对比、阴影、神秘",
+        "色彩：低饱和、冷调、深蓝、墨黑、真实夜景",
+        "氛围：孤独、寂静、神秘、深邃、夜晚感",
+        "禁止：明亮、暖调、高饱和、清晰、完美"
+      ],
+      "prompt_template": "night scene, dark tone, local light, high contrast, deep shadow, low saturation, cold blue tone, mysterious atmosphere, quiet, realistic night texture",
+      "negative_prompt": "bright, warm, high saturation, sharp, perfect, cartoon"
+    },
+    {
+      "category": "氛围·清晨微光",
+      "core_rules": [
+        "光影：微弱、柔和、冷调、薄雾、清新",
+        "细节：露水、雾气、微光、安静、自然",
+        "氛围：清新、宁静、希望、纯净、自然苏醒",
+        "禁止：强烈光、暖调、干燥、明亮、刺眼"
+      ],
+      "prompt_template": "early morning, faint light, soft mist, dew drops, cold tone, fresh atmosphere, peaceful, pure, realistic morning texture",
+      "negative_prompt": "strong light, warm, dry, bright, harsh, cartoon"
+    },
+    {
+      "category": "光影·丁达尔光束",
+      "core_rules": [
+        "效果：光束穿透、雾气、尘埃、光斑、真实",
+        "光影：强烈对比、明暗分割、氛围感、神圣",
+        "环境：森林、教堂、房间、窗户、自然空间",
+        "禁止：均匀光、无雾、清晰、干燥、完美"
+      ],
+      "prompt_template": "god rays, light beams through mist, dust particles, dappled light, high contrast, atmospheric haze, sacred atmosphere, realistic light effect",
+      "negative_prompt": "even light, no fog, sharp, dry, perfect, cartoon"
+    },
+    {
+      "category": "光影·逆光剪影",
+      "core_rules": [
+        "效果：轮廓清晰、背光、强烈对比、剪影",
+        "光影：低角度、眩光、暖调、氛围感",
+        "氛围：浪漫、故事感、孤独、力量、简洁",
+        "禁止：正面光、清晰细节、明亮、完美"
+      ],
+      "prompt_template": "backlight silhouette, strong contrast, lens flare, warm tone, outline clear, romantic atmosphere, storytelling, realistic light effect",
+      "negative_prompt": "front light, sharp detail, bright, perfect, cartoon"
+    },
+    {
+      "category": "光影·窗边柔光",
+      "core_rules": [
+        "光影：柔和、漫射、暖调、无硬阴影、治愈",
+        "环境：室内、窗帘、家具、生活化、安静",
+        "氛围：温暖、治愈、慵懒、日常、安静",
+        "禁止：硬光、高对比、刺眼、明亮、冷调"
+      ],
+      "prompt_template": "soft window light, diffused, warm tone, gentle shadow, cozy indoor atmosphere, lazy, peaceful, realistic light effect",
+      "negative_prompt": "hard light, high contrast, harsh, bright, cold tone, cartoon"
+    },
+    {
+      "category": "光影·硬光高对比",
+      "core_rules": [
+        "光影：强烈、锐利、高对比、阴影分明、力量",
+        "氛围：冷峻、硬朗、戏剧、张力、纪实",
+        "禁止：柔光、低对比、柔和、温暖、治愈"
+      ],
+      "prompt_template": "hard light, high contrast, sharp shadow, dramatic atmosphere, gritty, realistic light effect, film grain",
+      "negative_prompt": "soft light, low contrast, gentle, warm, cartoon"
+    },
+    {
+      "category": "风格·胶片复古",
+      "core_rules": [
+        "效果：颗粒、褪色、偏色、暗角、怀旧",
+        "色彩：低饱和、暖黄、青蓝、复古色调",
+        "氛围：怀旧、时光、故事、温暖、复古",
+        "禁止：高清、鲜艳、完美、无颗粒、现代"
+      ],
+      "prompt_template": "film photography, grainy, faded color, warm yellow tone, cyan tint, vignetting, nostalgic atmosphere, time trace, realistic film effect",
+      "negative_prompt": "high definition, vivid, perfect, no grain, modern, cartoon"
+    },
+    {
+      "category": "风格·纪实新闻",
+      "core_rules": [
+        "效果：抓拍、动态、真实、不完美、纪实",
+        "光影：自然、高对比、颗粒、粗糙、力量",
+        "氛围：真实、力量、故事、社会、生活",
+        "禁止：摆拍、完美、精致、美化、CGI"
+      ],
+      "prompt_template": "documentary photography, candid shot, dynamic, realistic, high contrast, film grain, gritty texture, storytelling, social atmosphere",
+      "negative_prompt": "posed, perfect, delicate, beautified, CGI, cartoon"
+    },
+    {
+      "category": "风格·电影感氛围",
+      "core_rules": [
+        "效果：宽屏、暗角、高对比、色调统一、叙事",
+        "光影：戏剧、层次、氛围、故事感、镜头感",
+        "氛围：电影、叙事、张力、情绪、高级",
+        "禁止：明亮、平淡、无层次、卡通、插画"
+      ],
+      "prompt_template": "cinematic atmosphere, wide screen, vignetting, high contrast, unified color tone, dramatic light, storytelling, emotional tension, realistic film effect",
+      "negative_prompt": "bright, flat, no layer, cartoon, illustration, perfect"
+    },
+    {
+      "category": "风格·日系清新",
+      "core_rules": [
+        "色彩：低饱和、浅蓝、浅绿、暖白、清新",
+        "光影：柔光、漫射、无硬阴影、治愈",
+        "氛围：干净、治愈、安静、日常、日系",
+        "禁止：高饱和、硬光、高对比、杂乱、复古"
+      ],
+      "prompt_template": "Japanese fresh style, low saturation, light blue tone, soft diffused light, clean atmosphere, healing, quiet, realistic color",
+      "negative_prompt": "high saturation, hard light, high contrast, cluttered, retro, cartoon"
+    },
+    {
+      "category": "风格·港风复古",
+      "core_rules": [
+        "色彩：高饱和、暖红、青蓝、对比强烈、复古",
+        "光影：霓虹、眩光、暗调、颗粒、怀旧",
+        "氛围：港风、复古、繁华、烟火、故事",
+        "禁止：低饱和、清新、明亮、干净、现代"
+      ],
+      "prompt_template": "Hong Kong retro style, high saturation, warm red tone, neon light, lens flare, dark tone, film grain, nostalgic atmosphere, bustling",
+      "negative_prompt": "low saturation, fresh, bright, clean, modern, cartoon"
+    },
+    {
+      "category": "风格·暗调高级",
+      "core_rules": [
+        "色彩：低饱和、深灰、墨黑、冷调、高级",
+        "光影：暗调、局部光、高对比、极简、冷峻",
+        "氛围：高级、冷静、简约、神秘、质感",
+        "禁止：明亮、暖调、高饱和、杂乱、复古"
+      ],
+      "prompt_template": "dark luxury style, low saturation, deep gray tone, cold local light, high contrast, minimalist, calm atmosphere, realistic texture",
+      "negative_prompt": "bright, warm tone, high saturation, cluttered, retro, cartoon"
+    },
+    {
+      "category": "镜头·广角冲击",
+      "core_rules": [
+        "效果：透视强烈、空间拉伸、边缘畸变、冲击",
+        "视角：低角度、仰视、广阔、张力、力量",
+        "氛围：宏大、震撼、张力、视觉冲击",
+        "禁止：平视、平淡、无畸变、柔和、小视角"
+      ],
+      "prompt_template": "wide-angle lens, strong perspective, space stretch, edge distortion, low angle, grand atmosphere, visual impact, realistic lens effect",
+      "negative_prompt": "eye-level view, flat, no distortion, gentle, small angle, cartoon"
+    },
+    {
+      "category": "镜头·长焦压缩",
+      "core_rules": [
+        "效果：空间压缩、背景虚化、层次、氛围感",
+        "视角：平视、远景、压缩、简洁、高级",
+        "氛围：宁静、简洁、高级、故事、柔和",
+        "禁止：广角、畸变、杂乱、冲击、强烈"
+      ],
+      "prompt_template": "telephoto lens, space compression, background blur, layered atmosphere, peaceful, minimalist, realistic lens effect",
+      "negative_prompt": "wide-angle, distortion, cluttered, impact, strong, cartoon"
+    },
+    {
+      "category": "镜头·微距细节",
+      "core_rules": [
+        "效果：极致细节、纹理、微观、真实、质感",
+        "光影：侧光、反光、阴影、层次、清晰",
+        "氛围：细腻、精致、微观、真实、质感",
+        "禁止：模糊、宏观、杂乱、无细节、塑料感"
+      ],
+      "prompt_template": "macro shot, extreme detail, texture close-up, side light, reflection, layered shadow, realistic micro texture, clear",
+      "negative_prompt": "blurry, macro, cluttered, no detail, plastic, cartoon"
+    },
+    {
+      "category": "镜头·鱼眼夸张",
+      "core_rules": [
+        "效果：强烈畸变、圆形视野、夸张、趣味",
+        "视角：全景、包围、夸张、视觉趣味",
+        "氛围：趣味、夸张、创意、视觉冲击",
+        "禁止：正常视角、平淡、无畸变、柔和"
+      ],
+      "prompt_template": "fisheye lens, strong distortion, circular view, exaggerated perspective, creative atmosphere, visual fun, realistic lens effect",
+      "negative_prompt": "normal view, flat, no distortion, gentle, cartoon"
+    },
+    {
+      "category": "材质·木质温润",
+      "core_rules": [
+        "纹理：木纹、结疤、磨损、划痕、真实温润",
+        "光影：柔光、暖调、反光、层次、自然",
+        "氛围：温暖、自然、质朴、治愈、温润",
+        "禁止：光滑、塑料、崭新、完美、冰冷"
+      ],
+      "prompt_template": "wood texture, wood grain, knots, worn marks, soft warm light, reflection, natural atmosphere, warm, realistic texture",
+      "negative_prompt": "smooth, plastic, new, perfect, cold, cartoon"
+    },
+    {
+      "category": "材质·金属冷硬",
+      "core_rules": [
+        "纹理：拉丝、划痕、氧化、反光、冷硬",
+        "光影：硬光、高对比、强烈反光、冷峻",
+        "氛围：工业、冷硬、高级、力量、现代",
+        "禁止：温润、柔软、温暖、复古、塑料"
+      ],
+      "prompt_template": "metal texture, brushed, scratch marks, oxidation, strong reflection, hard light, high contrast, industrial atmosphere, cold, realistic texture",
+      "negative_prompt": "warm, soft, retro, plastic, cartoon"
+    },
+    {
+      "category": "材质·石材粗糙",
+      "core_rules": [
+        "纹理：颗粒、裂缝、磨损、凹凸、粗糙真实",
+        "光影：硬光、阴影、层次、力量、自然",
+        "氛围：原始、力量、自然、粗犷、真实",
+        "禁止：光滑、细腻、完美、塑料、现代"
+      ],
+      "prompt_template": "stone texture, grain, cracks, worn marks, hard light, shadow layer, wild atmosphere, rough, realistic texture",
+      "negative_prompt": "smooth, delicate, perfect, plastic, modern, cartoon"
+    },
+    {
+      "category": "材质·布料垂坠",
+      "core_rules": [
+        "纹理：褶皱、垂坠、纹理、柔软、真实",
+        "光影：柔光、阴影、层次、柔软、自然",
+        "氛围：柔软、舒适、自然、生活、温润",
+        "禁止：僵硬、光滑、塑料、完美、冰冷"
+      ],
+      "prompt_template": "fabric texture, natural folds, drape, soft light, shadow layer, comfortable atmosphere, soft, realistic texture",
+      "negative_prompt": "stiff, smooth, plastic, perfect, cold, cartoon"
+    },
+    {
+      "category": "材质·玻璃通透",
+      "core_rules": [
+        "效果：通透、反光、折射、模糊、真实",
+        "光影：眩光、反射、层次、通透、冷调",
+        "氛围：干净、通透、高级、现代、清冷",
+        "禁止：浑浊、不透明、塑料、模糊、杂乱"
+      ],
+      "prompt_template": "glass texture, transparent, reflection, refraction, lens flare, clear atmosphere, cold tone, realistic texture",
+      "negative_prompt": "turbid, opaque, plastic, blurry, cluttered, cartoon"
+    },
+    {
+      "category": "情绪·孤独寂静",
+      "core_rules": [
+        "氛围：空旷、安静、无人、冷调、孤独",
+        "光影：暗调、柔光、低对比、朦胧、寂静",
+        "细节：空景、留白、简单、无人物、安静",
+        "禁止：热闹、明亮、暖调、人群、杂乱"
+      ],
+      "prompt_template": "lonely atmosphere, empty space, quiet, no people, cold tone, dark soft light, low contrast, misty, peaceful, realistic mood",
+      "negative_prompt": "busy, bright, warm tone, crowd, cluttered, cartoon"
+    },
+    {
+      "category": "情绪·治愈温暖",
+      "core_rules": [
+        "氛围：温暖、柔和、明亮、舒适、治愈",
+        "光影：暖调、柔光、漫射、无硬阴影、安心",
+        "细节：生活化、自然、简单、舒适、日常",
+        "禁止：冷调、暗调、高对比、杂乱、孤独"
+      ],
+      "prompt_template": "healing atmosphere, warm, soft, comfortable, warm diffused light, no hard shadow, daily life, peaceful, realistic mood",
+      "negative_prompt": "cold tone, dark tone, high contrast, cluttered, lonely, cartoon"
+    },
+    {
+      "category": "情绪·热烈奔放",
+      "core_rules": [
+        "氛围：热闹、鲜艳、高饱和、活力、奔放",
+        "光影：强烈、高对比、暖调、活力、力量",
+        "细节：动态、人群、色彩、活力、热情",
+        "禁止：安静、低饱和、冷调、空旷、孤独"
+      ],
+      "prompt_template": "passionate atmosphere, lively, high saturation, dynamic, strong light, high contrast, warm tone, energetic, realistic mood",
+      "negative_prompt": "quiet, low saturation, cold tone, empty, lonely, cartoon"
+    },
+    {
+      "category": "通用·写实摄影",
+      "core_rules": [
+        "必须：photorealistic、raw photo、film grain、真实纹理",
+        "必须：相机型号、镜头、光圈、ISO、摄影感",
+        "必须：自然光影、阴影、空气透视、轻微不完美",
+        "禁止：完美、光滑、无瑕疵、CGI、插画、卡通"
+      ],
+      "prompt_template": "photorealistic, raw photo, 8K, Fujifilm X-T5, 24mm, f/2.8, film grain, realistic textures, natural lighting, subtle shadows, atmospheric perspective, dynamic, slight imperfections",
+      "negative_prompt": "perfect, smooth, plastic, CGI, 3D render, illustration, cartoon, anime, over-saturated, blurry, fake"
+    },
+    {
+      "category": "风格·国漫古风（中式动画）",
+      "core_rules": [
+        "线条：流畅、中式水墨勾线、干净但有笔触感",
+        "色彩：低饱和、青蓝、墨绿、暖金、国风色调",
+        "光影：柔和、平涂、无强烈阴影、国风氛围",
+        "人物：东方脸、丹凤眼、古风发型、服饰飘逸",
+        "禁止：日漫大眼、厚涂、高对比、写实、3D"
+      ],
+      "prompt_template": "Chinese animation style, traditional Chinese ink line art, clean brush strokes, low saturation, cyan and gold tone, soft light, flat shading, ancient Chinese characters, flowing Hanfu, elegant atmosphere, Chinese style",
+      "negative_prompt": "Japanese anime big eyes, thick paint, high contrast, photorealistic, 3D render, western style"
+    },
+    {
+      "category": "风格·国漫现代都市（如一人之下）",
+      "core_rules": [
+        "线条：硬朗、利落、现代国漫线条、偏写实比例",
+        "色彩：高对比、冷调、都市灰蓝、霓虹点缀",
+        "光影：硬光、阴影分明、街头感、力量感",
+        "氛围：都市、街头、热血、现实、张力",
+        "禁止：萌系、大眼、柔和、日漫萌系、低对比"
+      ],
+      "prompt_template": "modern Chinese animation style, sharp lines, realistic proportions, high contrast, cool urban tone, neon accents, hard light, street atmosphere, dynamic, Chinese urban style",
+      "negative_prompt": "moe style, big eyes, soft light, Japanese moe, low contrast, cute"
+    },
+    {
+      "category": "风格·日漫萌系（Kawaii）",
+      "core_rules": [
+        "人物：大眼、小圆脸、Q版比例、柔和线条",
+        "色彩：高饱和、粉嫩、浅蓝、浅粉、明亮",
+        "光影：柔光、无硬阴影、平涂、可爱氛围",
+        "氛围：治愈、可爱、清新、少女、梦幻",
+        "禁止：写实、国漫、硬朗、高对比、暗调"
+      ],
+      "prompt_template": "Japanese kawaii anime style, big round eyes, soft lines, high saturation, pastel colors, soft light, flat shading, cute atmosphere, healing, dreamy",
+      "negative_prompt": "photorealistic, Chinese animation, sharp lines, high contrast, dark tone"
+    },
+    {
+      "category": "风格·日漫热血少年（Jump系）",
+      "core_rules": [
+        "线条：锐利、力量感、粗轮廓线、动态强烈",
+        "色彩：高饱和、暖红、亮黄、对比强烈",
+        "光影：硬光、爆炸光、阴影夸张、张力",
+        "氛围：热血、战斗、速度、力量、激情",
+        "禁止：柔和、萌系、低对比、平涂、治愈"
+      ],
+      "prompt_template": "Japanese shonen anime style, sharp lines, strong outline, high saturation, warm red tone, hard light, exaggerated shadow, dynamic action, passionate atmosphere",
+      "negative_prompt": "soft, moe, low contrast, flat shading, healing"
+    },
+    {
+      "category": "风格·日漫治愈系（新海诚风）",
+      "core_rules": [
+        "光影：通透、逆光、光晕、柔和、空气感",
+        "色彩：清新、浅蓝、浅绿、暖白、高透亮",
+        "线条：细腻、干净、轻微描边、不厚重",
+        "氛围：清新、治愈、青春、天空、云朵",
+        "禁止：硬朗、高对比、暗调、粗线条、国漫"
+      ],
+      "prompt_template": "Makoto Shinkai style, transparent light, backlight glow, soft atmosphere, fresh blue tone, clean lines, sky and clouds, youthful healing, Japanese anime",
+      "negative_prompt": "sharp lines, high contrast, dark tone, thick outline, Chinese style"
+    },
+    {
+      "category": "风格·日漫暗黑系（进击/咒术）",
+      "core_rules": [
+        "线条：粗重、压抑、锐利、力量感",
+        "色彩：低饱和、暗灰、深蓝、暗红、压抑",
+        "光影：高对比、暗调、局部光、阴影厚重",
+        "氛围：紧张、压抑、战斗、黑暗、张力",
+        "禁止：明亮、治愈、萌系、柔和、清新"
+      ],
+      "prompt_template": "dark Japanese anime style, thick heavy lines, low saturation, dark gray tone, high contrast, local light, heavy shadow, tense atmosphere, battle",
+      "negative_prompt": "bright, healing, moe, soft, fresh"
+    },
+    {
+      "category": "风格·赛博朋克动漫（Cyberpunk Anime）",
+      "core_rules": [
+        "色彩：霓虹紫、青蓝、亮粉、高对比、科技感",
+        "光影：眩光、反光、暗调、霓虹光污染",
+        "线条：锐利、科技感、机械、未来感",
+        "氛围：都市、科技、颓废、霓虹、未来",
+        "禁止：古风、清新、柔和、低对比、治愈"
+      ],
+      "prompt_template": "cyberpunk anime style, neon purple and cyan, high contrast, lens flare, dark tone, futuristic city, sharp lines, tech atmosphere",
+      "negative_prompt": "ancient style, fresh, soft, low contrast, healing"
+    },
+    {
+      "category": "风格·蒸汽朋克动漫（Steampunk Anime）",
+      "core_rules": [
+        "元素：齿轮、机械、黄铜、复古、工业",
+        "色彩：暖棕、古铜、暗金、低饱和、复古",
+        "光影：暖调、柔光、金属反光、复古氛围",
+        "线条：复古、机械、厚重、工业感",
+        "禁止：赛博、霓虹、清新、未来、萌系"
+      ],
+      "prompt_template": "steampunk anime style, gears, brass texture, warm brown tone, soft light, metal reflection, vintage industrial atmosphere, mechanical details",
+      "negative_prompt": "cyberpunk, neon, fresh, futuristic, moe"
+    },
+    {
+      "category": "风格·古风仙侠动漫（仙侠国漫）",
+      "core_rules": [
+        "元素：仙气、云雾、飘带、剑光、仙侠特效",
+        "色彩：淡青、浅紫、暖金、仙气、飘逸",
+        "光影：柔光、光晕、仙气、朦胧、梦幻",
+        "氛围：仙侠、飘逸、仙气、江湖、东方",
+        "禁止：现代、都市、硬朗、高对比、日漫萌系"
+      ],
+      "prompt_template": "Chinese xianxia animation style, immortal aura, cloud mist, flowing ribbons, sword light, soft glow, light cyan tone, elegant immortal atmosphere",
+      "negative_prompt": "modern, urban, sharp lines, high contrast, Japanese moe"
+    },
+    {
+      "category": "风格·Q版卡通（Chibi）",
+      "core_rules": [
+        "比例：头大身小、2头身/3头身、极度简化",
+        "线条：圆润、无棱角、可爱、简单",
+        "色彩：高饱和、明亮、色块分明、平涂",
+        "氛围：可爱、搞笑、轻松、童趣、简单",
+        "禁止：写实、复杂、高对比、暗调、硬朗"
+      ],
+      "prompt_template": "chibi style, big head small body, round lines, high saturation, bright colors, flat color blocks, cute and funny atmosphere, simple",
+      "negative_prompt": "photorealistic, complex, high contrast, dark tone, sharp"
+    },
+    {
+      "category": "风格·厚涂写实动漫（Painterly Anime）",
+      "core_rules": [
+        "质感：厚涂、笔触明显、油画质感、层次强",
+        "光影：强烈、明暗分明、质感厚重、真实",
+        "色彩：自然、低饱和、偏写实、高级",
+        "氛围：高级、艺术、厚重、电影感",
+        "禁止：平涂、线条明显、萌系、清新、简单"
+      ],
+      "prompt_template": "painterly anime style, thick paint, visible brush strokes, strong light and shadow, realistic texture, natural color, artistic atmosphere, cinematic",
+      "negative_prompt": "flat shading, obvious lines, moe, fresh, simple"
+    },
+    {
+      "category": "风格·平涂赛璐璐（Cel-Shading）",
+      "core_rules": [
+        "技法：色块分明、无渐变、硬边缘、赛璐璐",
+        "线条：清晰、干净、轮廓明显、复古",
+        "色彩：高饱和、复古、明亮、对比强",
+        "氛围：复古动画、经典、干净、简洁",
+        "禁止：厚涂、渐变、柔和、写实、复杂"
+      ],
+      "prompt_template": "cel-shading anime style, flat color blocks, hard edges, clear outline, retro animation, high saturation, clean and simple",
+      "negative_prompt": "thick paint, gradient, soft, photorealistic, complex"
+    },
+    {
+      "category": "风格·水墨国风插画（Ink Wash）",
+      "core_rules": [
+        "技法：水墨晕染、留白、淡彩、写意",
+        "色彩：墨黑、浅青、赭石、淡雅、国风",
+        "线条：书法笔触感、写意、不僵硬",
+        "氛围：禅意、古风、诗意、东方、留白",
+        "禁止：高饱和、霓虹、萌系、日漫、硬朗"
+      ],
+      "prompt_template": "Chinese ink wash illustration, ink rendering, blank space, light color, calligraphy brush strokes, zen atmosphere, ancient Chinese style, poetic",
+      "negative_prompt": "high saturation, neon, moe, Japanese anime, sharp"
+    },
+    {
+      "category": "风格·浮世绘风（Ukiyo-e）",
+      "core_rules": [
+        "线条：硬朗、平面、轮廓清晰、日式传统",
+        "色彩：平涂、高对比、复古、和风",
+        "元素：海浪、富士山、和服、日式纹样",
+        "氛围：传统、复古、和风、平面、艺术",
+        "禁止：萌系、厚涂、渐变、现代、赛博"
+      ],
+      "prompt_template": "Ukiyo-e style, sharp lines, flat color, high contrast, traditional Japanese elements, wave and mountain, retro atmosphere",
+      "negative_prompt": "moe, thick paint, gradient, modern, cyberpunk"
+    },
+    {
+      "category": "风格·像素风动漫（Pixel Art Anime）",
+      "core_rules": [
+        "效果：低像素、方块感、复古游戏、清晰色块",
+        "色彩：复古、8-bit、16-bit、高饱和、复古",
+        "线条：像素边缘、硬边缘、复古游戏风",
+        "氛围：怀旧、复古、游戏、简洁、像素",
+        "禁止：平滑、渐变、厚涂、写实、复杂"
+      ],
+      "prompt_template": "pixel art anime style, low pixel, blocky texture, 8-bit retro game, clear color blocks, nostalgic atmosphere, simple",
+      "negative_prompt": "smooth, gradient, thick paint, photorealistic, complex"
+    },
+    {
+      "category": "风格·哥特暗黑动漫（Gothic Anime）",
+      "core_rules": [
+        "元素：蕾丝、十字架、暗纹、复古宫廷、暗黑",
+        "色彩：黑、暗红、深紫、低饱和、压抑",
+        "光影：暗调、局部光、高对比、神秘",
+        "氛围：神秘、优雅、暗黑、宫廷、复古",
+        "禁止：明亮、清新、萌系、治愈、高饱和"
+      ],
+      "prompt_template": "gothic anime style, lace, cross, dark pattern, deep red and purple tone, dark local light, mysterious elegant atmosphere",
+      "negative_prompt": "bright, fresh, moe, healing, high saturation"
+    },
+    {
+      "category": "风格·废土末世动漫（Post-Apocalyptic）",
+      "core_rules": [
+        "元素：废墟、沙尘、破旧、机械、荒凉",
+        "色彩：土黄、灰褐、暗红、低饱和、颓废",
+        "光影：沙尘、硬光、高对比、荒凉感",
+        "氛围：末世、废土、荒凉、生存、压抑",
+        "禁止：清新、治愈、明亮、萌系、高饱和"
+      ],
+      "prompt_template": "post-apocalyptic anime style, ruins, dust, worn texture, earthy yellow tone, harsh light, desolate atmosphere, survival",
+      "negative_prompt": "fresh, healing, bright, moe, high saturation"
+    },
+    {
+      "category": "风格·校园青春动漫（School Life）",
+      "core_rules": [
+        "元素：校服、教室、樱花、街道、青春",
+        "色彩：清新、浅粉、浅蓝、明亮、柔和",
+        "光影：柔光、逆光、光晕、青春氛围",
+        "氛围：青春、校园、日常、清新、治愈",
+        "禁止：暗黑、战斗、高对比、硬朗、末世"
+      ],
+      "prompt_template": "school life anime style, uniform, classroom, cherry blossoms, fresh light blue tone, soft backlight, youthful healing atmosphere",
+      "negative_prompt": "dark, battle, high contrast, sharp, post-apocalyptic"
+    },
+    {
+      "category": "风格·机甲科幻动漫（Mecha Anime）",
+      "core_rules": [
+        "元素：机甲、装甲、武器、科技、未来",
+        "色彩：金属灰、深蓝、霓虹、高对比、科技",
+        "光影：硬光、金属反光、爆炸光、力量",
+        "氛围：科幻、战斗、机械、未来、力量",
+        "禁止：古风、治愈、萌系、柔和、清新"
+      ],
+      "prompt_template": "mecha anime style, robot armor, weapons, metallic gray tone, high contrast, metal reflection, futuristic battle atmosphere",
+      "negative_prompt": "ancient style, healing, moe, soft, fresh"
+    },
+    {
+      "category": "风格·唯美插画（唯美系）",
+      "core_rules": [
+        "线条：细腻、轻盈、几乎无轮廓、朦胧",
+        "色彩：低饱和、莫兰迪、柔和、高级",
+        "光影：柔光、渐变、朦胧、空气感",
+        "氛围：唯美、梦幻、高级、安静、治愈",
+        "禁止：硬朗、高对比、粗线条、萌系、暗黑"
+      ],
+      "prompt_template": "aesthetic illustration style, delicate lines, almost no outline, morandi color, soft gradient light, dreamy and quiet atmosphere",
+      "negative_prompt": "sharp lines, high contrast, thick outline, moe, dark"
+    },
+    {
+      "category": "风格·莫兰迪色系（高级灰）",
+      "core_rules": [
+        "色彩：低饱和、灰调、莫兰迪色系、柔和、高级",
+        "光影：柔光、低对比、无硬阴影、朦胧",
+        "氛围：安静、高级、简约、治愈、优雅",
+        "禁止：高饱和、鲜艳、对比强烈、刺眼、杂乱"
+      ],
+      "prompt_template": "Morandi color scheme, low saturation, gray tone, soft diffused light, low contrast, quiet and elegant atmosphere, minimalist, healing",
+      "negative_prompt": "high saturation, vivid, strong contrast, harsh, cluttered"
+    },
+    {
+      "category": "风格·极简主义（Minimalism）",
+      "core_rules": [
+        "构图：留白、简洁、几何、少元素、干净",
+        "色彩：单色、低饱和、黑白灰、高级",
+        "光影：平光、低对比、无杂乱阴影",
+        "氛围：冷静、高级、空旷、简约、纯粹",
+        "禁止：杂乱、装饰、复杂、高对比、鲜艳"
+      ],
+      "prompt_template": "minimalist style, clean composition, negative space, geometric shapes, monochrome, flat light, calm and pure atmosphere",
+      "negative_prompt": "cluttered, decorated, complex, high contrast, vivid"
+    },
+    {
+      "category": "风格·印象派（Impressionism）",
+      "core_rules": [
+        "笔触：松散、模糊、光影闪烁、不清晰轮廓",
+        "色彩：自然、暖调、光影变化、空气感",
+        "氛围：朦胧、光影、自然、柔和、艺术",
+        "禁止：清晰线条、锐利、写实、高对比"
+      ],
+      "prompt_template": "impressionist painting style, loose brushstrokes, blurred edges, natural light changes, warm tone, atmospheric haze, artistic",
+      "negative_prompt": "sharp lines, clear outline, photorealistic, high contrast"
+    },
+    {
+      "category": "风格·超现实主义（Surrealism）",
+      "core_rules": [
+        "元素：奇幻、错位、梦境、不合理、超现实",
+        "光影：梦幻、柔光、低对比、神秘",
+        "氛围：梦境、奇幻、神秘、艺术、超现实",
+        "禁止：现实、合理、清晰、普通、日常"
+      ],
+      "prompt_template": "surrealist style, dreamlike elements, illogical composition, soft dreamy light, mysterious atmosphere, artistic fantasy",
+      "negative_prompt": "realistic, logical, ordinary, daily, clear"
+    },
+    {
+      "category": "风格·波普艺术（Pop Art）",
+      "core_rules": [
+        "色彩：高饱和、撞色、鲜艳、对比强烈",
+        "构图：重复、平面、符号、流行元素",
+        "氛围：潮流、复古、活力、商业、艺术",
+        "禁止：低饱和、柔和、暗调、简约、治愈"
+      ],
+      "prompt_template": "pop art style, high saturation, bold color contrast, repeating patterns, flat composition, trendy and vibrant atmosphere",
+      "negative_prompt": "low saturation, soft, dark tone, minimalist, healing"
+    },
+    {
+      "category": "风格·巴洛克（Baroque）",
+      "core_rules": [
+        "光影：强烈明暗对比、戏剧性、高光突出",
+        "色彩：浓郁、金红、深蓝、奢华、厚重",
+        "氛围：华丽、戏剧、庄严、复古、艺术",
+        "禁止：简约、清新、柔和、低对比、治愈"
+      ],
+      "prompt_template": "baroque style, dramatic chiaroscuro, rich color, gold and deep red tone, luxurious atmosphere, grand and solemn",
+      "negative_prompt": "minimalist, fresh, soft, low contrast, healing"
+    },
+    {
+      "category": "风格·洛可可（Rococo）",
+      "core_rules": [
+        "元素：曲线、花纹、蕾丝、轻盈、柔美",
+        "色彩：浅粉、浅蓝、奶油色、柔和、浪漫",
+        "氛围：优雅、浪漫、宫廷、柔美、复古",
+        "禁止：硬朗、高对比、暗调、简约、暗黑"
+      ],
+      "prompt_template": "rococo style, curvy lines, floral patterns, lace, soft pastel colors, elegant and romantic atmosphere, vintage court",
+      "negative_prompt": "sharp lines, high contrast, dark tone, minimalist, dark"
+    },
+    {
+      "category": "风格·工业风（Industrial）",
+      "core_rules": [
+        "材质：水泥、金属、裸露管线、粗糙、冷硬",
+        "色彩：灰黑、铁锈、冷调、低饱和",
+        "光影：硬光、高对比、阴影强烈、冷峻",
+        "氛围：粗犷、工业、冷硬、原始、力量",
+        "禁止：柔和、温暖、治愈、清新、精致"
+      ],
+      "prompt_template": "industrial style, concrete texture, metal, exposed pipes, rough surface, cold gray tone, hard light, high contrast",
+      "negative_prompt": "soft, warm, healing, fresh, delicate"
+    },
+    {
+      "category": "风格·侘寂风（Wabi‑Sabi）",
+      "core_rules": [
+        "质感：粗糙、残缺、自然、不完美、质朴",
+        "色彩：米白、土黄、灰褐、低饱和、自然",
+        "氛围：禅意、安静、残缺、自然、侘寂",
+        "禁止：完美、精致、鲜艳、高对比、现代"
+      ],
+      "prompt_template": "wabi-sabi style, rough texture, imperfection, natural material, earth tone, quiet zen atmosphere, minimalist",
+      "negative_prompt": "perfect, delicate, vivid, high contrast, modern"
+    },
+    {
+      "category": "风格·赛博复古（Synthwave）",
+      "core_rules": [
+        "色彩：霓虹粉、电光蓝、紫、高饱和、复古未来",
+        "光影：眩光、网格、复古80s、科技感",
+        "氛围：复古、未来、霓虹、迷幻、潮流",
+        "禁止：清新、治愈、低饱和、简约、自然"
+      ],
+      "prompt_template": "synthwave retro style, neon pink and electric blue, grid lines, 80s retro futurism, lens flare, vibrant atmosphere",
+      "negative_prompt": "fresh, healing, low saturation, minimalist, natural"
+    }
+  ]
+}

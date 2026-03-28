@@ -1,0 +1,35 @@
+{
+  "knowledge_base_name": "AIGC 提示词 (测试版)",
+  "categories": [
+    {
+      "category": "测试专属·紫色天空",
+      "core_rules": [
+        "天空必须是紫色",
+        "禁止使用蓝色、白色",
+        "云彩是洋红色"
+      ],
+      "prompt_template": "purple sky, surreal, violet magenta clouds, dreamlike, fantasy atmosphere",
+      "negative_prompt": "blue sky, white clouds, natural colors, realistic"
+    },
+    {
+      "category": "测试专属·火焰海浪",
+      "core_rules": [
+        "海浪由火焰组成",
+        "海水是岩浆",
+        "禁止用水蓝色"
+      ],
+      "prompt_template": "ocean waves made of fire, lava sea, burning waves, pyroclastic flow, magma ocean",
+      "negative_prompt": "blue water, normal ocean, water waves, calm sea"
+    },
+    {
+      "category": "测试专属·钻石森林",
+      "core_rules": [
+        "树木由透明钻石组成",
+        "光影折射强烈",
+        "禁止用绿色树叶"
+      ],
+      "prompt_template": "forest made of transparent diamond, crystal trees, strong light refraction, prismatic, sparkling, light beams",
+      "negative_prompt": "green leaves, organic wood, normal forest, matte"
+    }
+  ]
+}

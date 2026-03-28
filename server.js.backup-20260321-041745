@@ -12,8 +12,6 @@ const path = require('path')
 const LEARNING_FILE = path.join(__dirname, 'learning.json')
 const KNOWLEDGE_FILE = path.join(__dirname, 'knowledge.json')
 
-const SmartKnowledgeRetriever = require('./knowledge-retriever.js')
-
 // 加载知识库（全量）
 let knowledgeBase = null
 try {
@@ -332,59 +330,31 @@ const openai = new OpenAI({
   baseURL: 'https://integrate.api.nvidia.com/v1'
 })
 
-// Token 估算函数（用于调试和监控）
-function estimateTokens(text) {
-  const chineseCount = (text.match(/[\u4e00-\u9fa5]/g) || []).length
-  const englishCount = text.length - chineseCount
-  return Math.ceil(chineseCount * 1.5 + englishCount * 1)
-}
-
-// LLM 提示词增强函数（智能检索知识库）
+// LLM 提示词增强函数（全量注入知识库）
 async function enhancePrompt(description) {
   try {
-    // 智能检索：只注入最相关的3-5个类别
+    // 构建包含知识库的 system prompt
     let knowledgePrompt = ''
-    let ragInfo = null // RAG 匹配信息
     if (knowledgeBase && knowledgeBase.categories && knowledgeBase.categories.length > 0) {
-      const retriever = new SmartKnowledgeRetriever(knowledgeBase)
-      const matchedCategories = retriever.retrieve(description, 5) // 最多5个类别
+      knowledgePrompt = `
+=== 知识库 (${knowledgeBase.knowledge_base_name || 'AIGC 提示词'}) ===
 
-      if (matchedCategories.length > 0) {
-        console.log(`🎯 匹配到 ${matchedCategories.length} 个知识库类别：`)
-        matchedCategories.forEach((cat, idx) => {
-          console.log(`   ${idx + 1}. ${cat.category}（分数：${cat.score}）`)
-        })
+以下有 ${knowledgeBase.categories.length} 个类别的专业提示词知识，请根据用户描述智能选择并参考相应类别的核心规则、提示词模板：
 
-        knowledgePrompt = retriever.formatPrompt(matchedCategories)
+${knowledgeBase.categories.map((cat, idx) => `
+【类别 ${idx + 1}】${cat.category}
+核心规则：
+${cat.core_rules.map(rule => `  - ${rule}`).join('\n')}
 
-        // 计算节省的 token
-        const originalTokens = 32066 // 原全量注入
-        const reducedTokens = estimateTokens(knowledgePrompt)
-        const savedTokens = originalTokens - reducedTokens
-        console.log(`📊 Token 优化：${originalTokens} → ${reducedTokens} tokens (节省 ${((savedTokens / originalTokens) * 100).toFixed(1)}%)`)
+正向模板：
+${cat.prompt_template}
 
-        // 构建返回给前端的 RAG 信息
-        ragInfo = {
-          matchedCount: matchedCategories.length,
-          categories: matchedCategories.map(cat => ({
-            category: cat.category,
-            score: cat.score
-          })),
-          tokenOptimization: {
-            original: originalTokens,
-            reduced: reducedTokens,
-            saved: savedTokens,
-            savedPercent: ((savedTokens / originalTokens) * 100).toFixed(1)
-          }
-        }
-      } else {
-        console.log('⚠️  没有匹配的知识库类别，使用通用规则')
-        ragInfo = {
-          matchedCount: 0,
-          categories: [],
-          message: '没有匹配的知识库类别，使用通用规则'
-        }
-      }
+负向模板：
+${cat.negative_prompt}
+`).join('\n---\n')}
+
+=== 知识库结束 ===
+`
     }
 
     const completion = await openai.chat.completions.create({
@@ -436,7 +406,7 @@ ${knowledgePrompt}
 
 如果用户描述已经是专业的提示词格式，只需稍作优化。如果描述很简短，需要扩展细节（基于中国元素优先原则）。
 
-重要：分析用户描述后，从知识库中选择最匹配的类别，参考其核心规则和模板生成高质量提示词。
+重要：分析用户描述后，从知识库中选择最匹配的类别，参考其核心规则和提示词模板生成高质量提示词。
 
 JSON格式必须严格遵守：
 {
@@ -461,19 +431,7 @@ JSON格式必须严格遵守：
     if (jsonMatch) {
       jsonStr = jsonMatch[1].trim()
     }
-
-    const result = JSON.parse(jsonStr)
-
-    console.log(`🧠 LLM 增强完成：`)
-    console.log(`   描述：${description}`)
-    console.log(`   正向：${result.positive}`)
-    console.log(`   负向：${result.negative}`)
-    console.log(`   步数：${result.steps}  CFG：${result.cfg}  种子：${result.seed}`)
-
-    // 添加 RAG 信息到结果中
-    result._rag = ragInfo
-
-    return result
+    return JSON.parse(jsonStr)
   } catch (error) {
     console.error('LLM增强失败:', error.message || error)
     throw error
@@ -487,12 +445,11 @@ app.post('/api/generate', async (req, res) => {
 
     // 判断使用模式：有 description 则通过 LLM 增强，否则使用旧参数
     let finalPositive, finalNegative, finalSeed, finalSteps, finalCfg, finalWidth, finalHeight
-    let enhanced = null // 存储完整的 LLM 增强结果（包括 RAG 信息）
 
     if (description) {
       // 新协议：通过 LLM 增强
       try {
-        enhanced = await enhancePrompt(description)
+        const enhanced = await enhancePrompt(description)
         finalPositive = enhanced.positive
         finalNegative = enhanced.negative || "blurry, low quality, distorted, ugly, bad anatomy, deformed, poorly drawn"
         finalSteps = enhanced.steps || 20
@@ -620,14 +577,13 @@ app.post('/api/generate', async (req, res) => {
       prompt_id,
       estimatedDuration
     }
-    if (description && finalPositive && enhanced) {
+    if (description && finalPositive) {
       responseData.enhanced = {
         positive: finalPositive,
         negative: finalNegative,
         steps: finalSteps,
         cfg: finalCfg,
-        seed: finalSeed,
-        rag: enhanced._rag // RAG 匹配信息
+        seed: finalSeed
       }
     }
 

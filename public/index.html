@@ -8,7 +8,7 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', Arial, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', Arial, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
       padding: 20px;
@@ -32,7 +32,8 @@
           seed: '', // 已废弃，由 LLM 生成
           steps: 20, // 已废弃，由 LLM 生成
           cfg: 5, // 已废弃，由 LLM 生成
-          resolution: '1024x1024'
+          resolution: '1024x1024',
+          workflow: 'sdxl' // 'sdxl' (快速) 或 'omnigen2' (质量)
         })
 
         const generating = ref(false)
@@ -44,6 +45,15 @@
         const taskStartTime = ref(null)
         const estimatedDuration = ref(180)
         const remainingTimeText = ref('--:--')
+        const taskError = ref(null)
+
+        // 历史记录
+        const historyImages = ref([])
+        const historyVisible = ref(false)
+
+        // 常量
+        const TASK_STORAGE_KEY = 'comfyui-task'
+        const HISTORY_STORAGE_KEY = 'comfyui-history'
 
         const resetForm = () => {
           form.positive = ''
@@ -78,6 +88,136 @@
           return defaults[resolution] || 180
         }
 
+        // 历史记录管理
+        const saveHistoryImage = (img, description) => {
+          const history = loadHistory()
+          const newItem = {
+            id: Date.now(),
+            filename: img.filename,
+            url: img.url,
+            width: img.width,
+            height: img.height,
+            description: description || '无描述',
+            time: new Date().toLocaleString('zh-CN')
+          }
+          // 只保留最近 50 条
+          const newHistory = [newItem, ...history].slice(0, 50)
+          localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(newHistory))
+          historyImages.value = newHistory
+        }
+
+        const loadHistory = () => {
+          try {
+            const stored = localStorage.getItem(HISTORY_STORAGE_KEY)
+            return stored ? JSON.parse(stored) : []
+          } catch {
+            return []
+          }
+        }
+
+        // 任务状态管理
+        const saveTaskState = (state) => {
+          localStorage.setItem(TASK_STORAGE_KEY, JSON.stringify(state))
+        }
+
+        const loadTaskState = () => {
+          try {
+            const stored = localStorage.getItem(TASK_STORAGE_KEY)
+            return stored ? JSON.parse(stored) : null
+          } catch {
+            return null
+          }
+        }
+
+        const clearTaskState = () => {
+          localStorage.removeItem(TASK_STORAGE_KEY)
+          taskError.value = null
+        }
+
+        // 开始轮询（用于恢复任务或新任务）
+        const startPolling = (pid) => {
+          promptId.value = pid
+          let hasShownCompletion = false
+
+          const pollInterval = setInterval(async () => {
+            try {
+              const statusResp = await fetch(`/api/status?prompt_id=${pid}`)
+              const statusData = await statusResp.json()
+
+              if (!statusData.success) return
+
+              if (statusData.status === 'error') {
+                clearInterval(pollInterval)
+                generating.value = false
+                taskError.value = statusData.error || '未知错误'
+                clearTaskState()
+                ElementPlus.ElMessage.error('生成失败：' + taskError.value)
+                return
+              }
+
+              if (statusData.completed) {
+                if (!hasShownCompletion) {
+                  clearInterval(pollInterval)
+                  generating.value = false
+                  progress.value = 100
+                  remainingTimeText.value = '0:00'
+                  if (statusData.images && statusData.images.length > 0) {
+                    images.value = statusData.images
+                    // 保存到历史记录
+                    const currentDescription = form.positive.trim() || loadTaskState()?.description || '无描述'
+                    statusData.images.forEach(img => saveHistoryImage(img, currentDescription))
+                    ElementPlus.ElMessage.success(`生成完成！${statusData.images.length}张图片`)
+                  } else {
+                    ElementPlus.ElMessage.warning('任务完成但未生成图片')
+                  }
+                  clearTaskState()
+                  hasShownCompletion = true
+                }
+              } else {
+                hasShownCompletion = false
+                if (statusData.estimatedDuration) {
+                  estimatedDuration.value = statusData.estimatedDuration
+                }
+                updateRemainingTime()
+              }
+            } catch (err) {
+              console.error('轮询出错:', err.message)
+            }
+          }, 1000)
+
+          // 平滑动画
+          const animate = () => {
+            if (generating.value) {
+              const elapsedSeconds = (Date.now() - taskStartTime.value) / 1000
+              const target = Math.min((elapsedSeconds / estimatedDuration.value) * 100, 99.99)
+              progress.value = Number(target.toFixed(2))
+              updateRemainingTime()
+              requestAnimationFrame(animate)
+            }
+          }
+          requestAnimationFrame(animate)
+        }
+
+        // 恢复任务
+        const resumeTask = () => {
+          const savedTask = loadTaskState()
+          if (savedTask && savedTask.promptId) {
+            console.log('🔄 恢复任务：', savedTask)
+            promptId.value = savedTask.promptId
+            taskStartTime.value = savedTask.taskStartTime
+            estimatedDuration.value = savedTask.estimatedDuration
+            generating.value = true
+            taskError.value = null
+            const elapsed = (Date.now() - taskStartTime.value) / 1000
+            remainingTimeText.value = `${Math.floor(elapsed / 60)}:${Math.floor(elapsed % 60)}`
+            startPolling(savedTask.promptId)
+          }
+        }
+
+        // 组件加载时恢复任务和历史记录
+        resumeTask()
+        historyImages.value = loadHistory()
+
         const generate = async () => {
           if (!form.positive.trim()) {
             ElementPlus.ElMessage.warning('请描述你想生成的图片')
@@ -85,6 +225,7 @@
           }
 
           generating.value = true
+          taskError.value = null
           progress.value = 0
           images.value = []
           promptId.value = ''
@@ -96,9 +237,9 @@
 
           try {
             const payload = {
-              description: form.positive, // 用户的自然语言描述
-              resolution: form.resolution
-              // 其他参数由后端 LLM 自动生成
+              description: form.positive,
+              resolution: form.resolution,
+              workflow: form.workflow === 'omnigen2' ? 'quality' : 'sdxl'
             }
 
             const submitResp = await fetch('/api/generate', {
@@ -125,71 +266,53 @@
                 CFG: submitData.enhanced.cfg,
                 种子: submitData.enhanced.seed
               })
+
+              // 显示 RAG 检索信息
+              if (submitData.enhanced.rag) {
+                const rag = submitData.enhanced.rag
+                console.group('🎯 RAG 知识库检索')
+                if (rag.matchedCount > 0) {
+                  console.log('✅ 匹配到', rag.matchedCount, '个知识库类别:')
+                  rag.categories.forEach((cat, idx) => {
+                    console.log(`   ${idx + 1}. ${cat.category} (分数: ${cat.score})`)
+                  })
+
+                  if (rag.tokenOptimization) {
+                    console.group('📊 Token 优化')
+                    console.log('   原方案:', rag.tokenOptimization.original, 'tokens')
+                    console.log('   检索后:', rag.tokenOptimization.reduced, 'tokens')
+                    console.log('   节省:', rag.tokenOptimization.saved, 'tokens')
+                    console.log('   节省率:', rag.tokenOptimization.savedPercent + '%')
+                    console.groupEnd()
+                  }
+                } else {
+                  console.log('⚠️  ' + (rag.message || '没有匹配的知识库类别'))
+                }
+                console.groupEnd()
+              }
+
               console.groupEnd()
             }
 
-            // 立即使用后端返回的预估时间
+            // 使用后端返回的预估时间
             if (submitData.estimatedDuration) {
               estimatedDuration.value = submitData.estimatedDuration
             }
 
-            let hasShownCompletion = false
+            // 保存任务状态（用于刷新恢复）
+            saveTaskState({
+              promptId: submitData.prompt_id,
+              taskStartTime: taskStartTime.value,
+              estimatedDuration: estimatedDuration.value,
+              description: form.positive
+            })
 
-            // 轮询状态（1秒一次）
-            const pollInterval = setInterval(async () => {
-              try {
-                const statusResp = await fetch(`/api/status?prompt_id=${promptId.value}`)
-                const statusData = await statusResp.json()
-
-                if (!statusData.success) return
-
-                if (statusData.status === 'error') {
-                  clearInterval(pollInterval)
-                  generating.value = false
-                  ElementPlus.ElMessage.error('生成失败：' + (statusData.error || '未知错误'))
-                  return
-                }
-
-                if (statusData.completed) {
-                  if (!hasShownCompletion) {
-                    clearInterval(pollInterval)
-                    generating.value = false
-                    progress.value = 100
-                    remainingTimeText.value = '0:00'
-                    if (statusData.images && statusData.images.length > 0) {
-                      images.value = statusData.images
-                      ElementPlus.ElMessage.success(`生成完成！${statusData.images.length}张图片`)
-                    } else {
-                      ElementPlus.ElMessage.warning('任务完成但未生成图片')
-                    }
-                    hasShownCompletion = true
-                  }
-                } else {
-                  hasShownCompletion = false
-                  if (statusData.estimatedDuration) {
-                    estimatedDuration.value = statusData.estimatedDuration
-                  }
-                  updateRemainingTime()
-                }
-              } catch (err) {
-                console.error('轮询出错:', err.message)
-              }
-            }, 1000)
-
-            // 平滑动画（每帧更新）
-            const animate = () => {
-              if (generating.value) {
-                const elapsedSeconds = (Date.now() - taskStartTime.value) / 1000
-                const target = Math.min((elapsedSeconds / estimatedDuration.value) * 100, 99.99)
-                progress.value = Number(target.toFixed(2))
-                updateRemainingTime()
-                requestAnimationFrame(animate)
-              }
-            }
-            requestAnimationFrame(animate)
+            // 开始轮询
+            startPolling(submitData.prompt_id)
 
           } catch (error) {
             generating.value = false
+            clearTaskState()
             ElementPlus.ElMessage.error('请求失败：' + error.message)
           }
         }
@@ -197,7 +320,7 @@
         const downloadImage = (img) => {
           const link = document.createElement('a')
           link.href = img.url
-          link.download = img.filename
+          link.download = img.filename || '星澜图片.png'
           link.click()
           ElementPlus.ElMessage.success('开始下载')
         }
@@ -221,22 +344,27 @@
           generate,
           downloadImage,
           downloadAll,
-          remainingTimeText
+          remainingTimeText,
+          taskError,
+          clearTaskState,
+          historyImages,
+          historyVisible
         }
       },
       template: `
         <div class="app-container">
           <header class="header">
-            <h1>🎨 星澜智能绘图工作台</h1>
-            <p class="subtitle">Powered by 星澜智创 · 专业级AI图像生成</p>
+            <h1>✨ 星澜智能绘图</h1>
+            <p class="subtitle">用 AI 激活你的创意想象</p>
           </header>
 
-          <el-row :gutter="24" class="main-content">
-            <el-col :xs="24" :sm="24" :md="8" :lg="7">
-              <el-card shadow="hover" class="config-card">
+          <el-row :gutter="32" class="main-content">
+            <el-col :xs="24" :sm="24" :md="8" :lg="6">
+              <el-card shadow="never" class="config-card">
                 <template #header>
                   <div class="card-header">
-                    <span>⚙️ 参数配置</span>
+                    <span class="card-title">🎛️ 参数设置</span>
+                    <span class="card-badge">Config</span>
                   </div>
                 </template>
 
@@ -262,6 +390,13 @@
                       </el-option-group>
                     </el-select>
                   </el-form-item>
+
+                  <el-form-item label="模式">
+                    <el-radio-group v-model="form.workflow">
+                      <el-radio label="sdxl">快速</el-radio>
+                      <el-radio label="omnigen2">质量</el-radio>
+                    </el-radio-group>
+                  </el-form-item>
                 </el-form>
 
                 <div class="actions">
@@ -280,6 +415,12 @@
                   预估剩余时间：{{ remainingTimeText }}
                 </div>
               </el-card>
+
+              <el-card shadow="hover" class="error-card" v-if="taskError">
+                <template #header><span>❌ 生成失败</span></template>
+                <div style=" color: #f56c6c; margin-bottom: 12px;">{{ taskError }}</div>
+                <el-button type="primary" @click="clearTaskState">🔄 重置</el-button>
+              </el-card>
             </el-col>
 
             <el-col :xs="24" :sm="24" :md="16" :lg="17">
@@ -287,7 +428,10 @@
                 <template #header>
                   <div class="result-header">
                     <span>🖼️ 生成结果</span>
-                    <el-button v-if="images.length > 0" type="primary" size="small" plain @click="downloadAll">⬇️ 批量下载</el-button>
+                    <div style="display: flex; gap: 8px;">
+                      <el-button v-if="!generating" type="info" size="small" plain @click="historyVisible = true">📜 历史记录</el-button>
+                      <el-button v-if="images.length > 0" type="primary" size="small" plain @click="downloadAll">⬇️ 批量下载</el-button>
+                    </div>
                   </div>
                 </template>
 
@@ -323,11 +467,42 @@
                   <el-button type="primary" @click="downloadImage(selectedImage)">下载原图</el-button>
                 </template>
               </el-dialog>
+
+              <el-dialog v-model="historyVisible" title="📜 历史记录" width="80%" destroy-on-close>
+                <el-empty v-if="historyImages.length === 0" description="暂无历史记录" />
+                <div v-else class="image-grid">
+                  <div v-for="item in historyImages" :key="item.id" class="history-item" @click="selectedImage=item; previewVisible=true">
+                    <div class="image-wrapper">
+                      <img :src="item.url" :alt="item.filename" loading="lazy" @error="item.error=true" v-if="!item.error" />
+                      <div v-else class="error-placeholder">图片失效</div>
+                      <div class="overlay">
+                        <el-button type="primary" size="small" circle @click.stop="downloadImage(item)">⬇️</el-button>
+                      </div>
+                    </div>
+                    <div class="history-meta">
+                      <div class="time">{{ item.time }}</div>
+                      <div class="description">{{ item.description }}</div>
+                    </div>
+                  </div>
+                </div>
+                <template #footer v-if="historyImages.length > 0">
+                  <el-button @click="historyVisible = false">关闭</el-button>
+                  <el-popconfirm title="确定清空所有历史记录吗？" @confirm="historyImages=[]; localStorage.removeItem('comfyui-history'); ElementPlus.ElMessage.success('已清空')">
+                    <template #reference>
+                      <el-button type="danger">清空历史</el-button>
+                    </template>
+                  </el-popconfirm>
+                </template>
+              </el-dialog>
             </el-col>
           </el-row>
 
           <footer class="footer">
-            <p>v0.2.260305 · © 星澜智创 · 保留所有权利</p>
+            <div class="incognito-notice">
+              <el-icon style="margin-right: 6px; font-size: 16px;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></el-icon>
+              <span>在无痕模式打开页面会导致历史记录无法保存</span>
+            </div>
+            <p class="copyright">v0.2.260305 · © 星澜智创 · 保留所有权利</p>
           </footer>
         </div>
       `
@@ -337,59 +512,468 @@
   </script>
 
   <style scoped>
-    .app-container { min-height: 100vh; color: #333; }
-    .header { text-align: center; margin-bottom: 24px; color: white; }
-    .header h1 { font-size: 28px; margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-    .subtitle { font-size: 14px; opacity: 0.9; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-    .config-card .card-header { display: flex; justify-content: space-between; align-items: center; }
-    .actions { margin-top: 24px; }
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-attachment: fixed;
+      min-height: 100vh;
+      padding: 24px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    }
 
-    .result-card .result-header { display: flex; justify-content: space-between; align-items: center; }
+    #app {
+      max-width: 1440px;
+      margin: 0 auto;
+    }
 
+    /* 玻璃态效果 */
+    .config-card,
+    .status-card,
+    .error-card,
+    .result-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        inset 0 1px 1px rgba(255, 255, 255, 0.6);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .config-card:hover,
+    .result-card:hover {
+      transform: translateY(-4px);
+      box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.15),
+        inset 0 1px 1px rgba(255, 255, 255, 0.6);
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 32px 0;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .header h1 {
+      font-size: 56px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff 0%, #f0d4ff 50%, #fff 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+      animation: shimmer 3s linear infinite;
+    }
+
+    @keyframes shimmer {
+      to {
+        background-position: 200% center;
+      }
+    }
+
+    .subtitle {
+      font-size: 18px;
+      color: rgba(255, 255, 255, 0.85);
+      font-weight: 400;
+      letter-spacing: 0.5px;
+    }
+
+    /* Card Header */
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .card-badge {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    /* Result Header */
+    .result-card .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .result-card .result-header span {
+      font-size: 18px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    /* Form Elements */
+    .el-form-item {
+      margin-bottom: 28px;
+    }
+
+    .el-form-item__label {
+      color: #555;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .el-textarea__inner,
+    .el-input__wrapper,
+    .el-select {
+      border-radius: 12px !important;
+      border: 2px solid #e8e8e8;
+      transition: all 0.3s ease;
+    }
+
+    .el-textarea__inner:focus,
+    .el-input__wrapper:hover,
+    .el-select:hover {
+      border-color: #667eea !important;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    /* Radio Buttons */
+    .el-radio-group {
+      display: flex;
+      gap: 12px;
+    }
+
+    .el-radio.el-radio--border {
+      border-radius: 10px;
+      padding: 10px 20px;
+      border: 2px solid #e8e8e8;
+      transition: all 0.3s ease;
+    }
+
+    .el-radio.el-radio--border:hover {
+      border-color: #667eea;
+      transform: translateY(-1px);
+    }
+
+    .el-radio.is-checked.el-radio--border {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-color: transparent;
+      color: white;
+    }
+
+    /* Actions */
+    .actions {
+      margin-top: 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .el-button--primary {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border: none;
+      color: white;
+      font-weight: 700;
+      font-size: 16px;
+      border-radius: 14px;
+      height: 56px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .el-button--primary:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+    }
+
+    .el-button--primary:active {
+      transform: translateY(-1px);
+    }
+
+    .el-button:not(.el-button--primary) {
+      border-radius: 12px;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      background: rgba(255, 255, 255, 0.9);
+      transition: all 0.3s ease;
+    }
+
+    .el-button:not(.el-button--primary):hover {
+      border-color: #667eea;
+      transform: translateY(-2px);
+    }
+
+    /* Status Card */
+    .status-card {
+      margin-top: 24px;
+    }
+
+    .el-progress__text {
+      color: #667eea;
+      font-weight: 700;
+    }
+
+    /* Error Card */
+    .error-card {
+      margin-top: 24px;
+      border-left: 5px solid #f56565;
+    }
+
+    .error-card [class*=" el-icon-"] {
+      color: #f56565;
+    }
+
+    /* Image Grid */
     .image-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 16px;
-      margin-top: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 24px;
+      margin-top: 28px;
     }
-    .image-item {
-      border: 2px solid transparent;
-      border-radius: 12px;
-      overflow: hidden;
-      transition: all 0.3s ease;
-      cursor: pointer;
+
+    .image-item,
+    .history-item {
       background: white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
     }
-    .image-item:hover { border-color: #667eea; transform: translateY(-4px); box-shadow: 0 8px 16px rgba(0,0,0,0.15); }
 
-    .image-wrapper { position: relative; padding-top: 100%; overflow: hidden; background: #f5f5f5; }
-    .image-wrapper img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+    .image-item:hover,
+    .history-item:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .image-wrapper {
+      position: relative;
+      padding-top: 100%;
+      overflow: hidden;
+      background: #f7f7f7;
+    }
+
+    .image-wrapper img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .image-item:hover .image-wrapper img,
+    .history-item:hover .image-wrapper img {
+      transform: scale(1.1) rotate(1deg);
+    }
+
     .overlay {
-      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.6);
-      display: flex; align-items: center; justify-content: center;
-      opacity: 0; transition: opacity 0.3s ease;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.8), rgba(118, 75, 162, 0.8));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .image-item:hover .overlay { opacity: 1; }
 
-    .image-meta { padding: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #666; background: white; }
-    .filename { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .image-item:hover .overlay,
+    .history-item:hover .overlay {
+      opacity: 1;
+    }
 
-    .loading-container { display: flex; justify-content: center; align-items: center; min-height: 400px; }
-    .loading-animation { text-align: center; }
+    .image-wrapper .el-button--circle {
+      transform: scale(0.8);
+      border: none;
+      background: white;
+    }
+
+    .image-item:hover .el-button--circle,
+    .history-item:hover .el-button--circle {
+      transform: scale(1);
+    }
+
+    .image-meta,
+    .history-meta {
+      padding: 16px;
+      background: white;
+      border-top: 1px solid #f0f0f0;
+    }
+
+    .filename {
+      color: #333;
+      font-weight: 600;
+      font-size: 13px;
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .size {
+      color: #999;
+      font-size: 12px;
+    }
+
+    /* History Meta */
+    .history-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .history-meta .time {
+      color: #999;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .history-meta .description {
+      color: #555;
+      font-size: 12px;
+      max-height: 38px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      line-height: 1.5;
+    }
+
+    /* Error Placeholder */
+    .error-placeholder {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ccc;
+      font-size: 13px;
+      background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
+    }
+
+    /* Loading */
+    .loading-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 480px;
+    }
+
+    .loading-animation {
+      text-align: center;
+    }
+
     .spinner {
-      width: 60px; height: 60px;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #667eea;
+      width: 80px;
+      height: 80px;
+      border: 4px solid rgba(102, 126, 234, 0.1);
+      border-top-color: #667eea;
       border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 16px;
+      animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      margin: 0 auto 24px;
     }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    .footer { text-align: center; padding: 20px; color: rgba(255,255,255,0.8); font-size: 14px; }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading-animation p {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 16px;
+      font-weight: 500;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 36px 24px;
+      margin-top: 48px;
+    }
+
+    .incognito-notice {
+      display: inline-flex;
+      align-items: center;
+      margin-bottom: 16px;
+      padding: 12px 20px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      color: rgba(255, 255, 255, 0.9);
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 500;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .incognito-notice .el-icon {
+      margin-right: 8px;
+    }
+
+    .copyright {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0.3px;
+    }
+
+    /* Empty State */
+    .el-empty__description {
+      color: #999;
+      font-weight: 500;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      body {
+        padding: 16px;
+      }
+
+      .header {
+        margin-bottom: 24px;
+        padding: 24px 0;
+      }
+
+      .header h1 {
+        font-size: 36px;
+      }
+
+      .subtitle {
+        font-size: 14px;
+      }
+
+      .image-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 16px;
+      }
+    }
   </style>
 </body>
 </html>
