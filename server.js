@@ -11,8 +11,46 @@ const path = require('path')
 
 const LEARNING_FILE = path.join(__dirname, 'learning.json')
 const KNOWLEDGE_FILE = path.join(__dirname, 'knowledge.json')
+const FLUX_RESULTS_FILE = path.join(__dirname, 'flux-results.json')
+
+// Flux 比例到尺寸的映射
+const FLUX_ASPECT_RATIO_MAP = {
+  '1:1': '1024x1024',
+  '16:9': '1328x800',
+  '9:16': '800x1328',
+  '5:4': '1104x944',
+  '4:5': '944x1104',
+  '3:2': '1248x832',
+  '2:3': '832x1248'
+}
+
+// 将比例转换为尺寸
+function convertAspectRatioToSize(aspectRatio) {
+  return FLUX_ASPECT_RATIO_MAP[aspectRatio] || '1024x1024'
+}
 
 const SmartKnowledgeRetriever = require('./knowledge-retriever.js')
+
+// Flux 结果存储和加载函数
+function loadFluxResults() {
+  try {
+    if (fs.existsSync(FLUX_RESULTS_FILE)) {
+      const data = fs.readFileSync(FLUX_RESULTS_FILE, 'utf8')
+      return JSON.parse(data)
+    }
+  } catch (err) {
+    console.error('❌ 加载 Flux 结果失败：', err.message)
+  }
+  return {}
+}
+
+function saveFluxResults(results) {
+  try {
+    fs.writeFileSync(FLUX_RESULTS_FILE, JSON.stringify(results, null, 2))
+  } catch (err) {
+    console.error('❌ 保存 Flux 结果失败：', err.message)
+  }
+}
 
 // 加载知识库（全量）
 let knowledgeBase = null
@@ -332,6 +370,89 @@ const openai = new OpenAI({
   baseURL: 'https://integrate.api.nvidia.com/v1'
 })
 
+// Flux.2-klein-4b API 调用（人气模式）
+async function callFluxAPI(prompt, width, height, seed) {
+  const invokeUrl = "https://ai.api.nvidia.com/v1/genai/black-forest-labs/flux.2-klein-4b"
+  const apiKey = process.env.NVIDIA_API_KEY || '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'
+
+  // 确保 seed 在有效范围内（0 到 2^32-1）
+  const validSeed = (seed || 0) % 4294967296
+
+  // 验证参数
+  if (!prompt || prompt.trim() === '') {
+    throw new Error('提示词不能为空')
+  }
+
+  // Flux.2-klein-4b 支持的尺寸
+  const validSizes = [
+    { width: 512, height: 512 },
+    { width: 768, height: 768 },
+    { width: 1024, height: 1024 },
+    { width: 512, height: 768 },
+    { width: 768, height: 512 },
+    { width: 1024, height: 768 },
+    { width: 768, height: 1024 }
+  ]
+
+  // 检查尺寸是否有效
+  const sizeValid = validSizes.some(s => s.width === width && s.height === height)
+  if (!sizeValid) {
+    console.warn(`⚠️ 尺寸 ${width}x${height} 可能不被 Flux.2-klein-4b 支持，尝试使用...`)
+  }
+
+  const headers = {
+    "Authorization": `Bearer ${apiKey}`,
+    "Accept": "application/json",
+  }
+
+  const payload = {
+    "prompt": prompt,
+    "width": width,
+    "height": height,
+    "seed": validSeed,
+    "steps": 4
+  }
+
+  console.log(`📤 Flux API 请求参数：`, {
+    prompt: prompt.substring(0, 100) + (prompt.length > 100 ? '...' : ''),
+    width,
+    height,
+    seed: validSeed,
+    steps: 4
+  })
+
+  const response = await fetch(invokeUrl, {
+    method: "post",
+    body: JSON.stringify(payload),
+    headers: { "Content-Type": "application/json", ...headers }
+  })
+
+  if (response.status !== 200) {
+    const errBody = await (await response.blob()).text()
+    console.error(`❌ Flux API 错误响应：`, errBody)
+    throw new Error(`Flux API 调用失败: ${response.status} ${errBody}`)
+  }
+
+  const response_body = await response.json()
+
+  // 处理返回的 base64 图片
+  if (response_body.artifacts && Array.isArray(response_body.artifacts)) {
+    response_body.images = response_body.artifacts.map((artifact, idx) => {
+      // 将 base64 转换为 data URL
+      const base64Data = artifact.base64
+      const dataUrl = `data:image/png;base64,${base64Data}`
+      return {
+        url: dataUrl,
+        width: width,
+        height: height,
+        seed: artifact.seed || validSeed
+      }
+    })
+  }
+
+  return response_body
+}
+
 // Token 估算函数（用于调试和监控）
 function estimateTokens(text) {
   const chineseCount = (text.match(/[\u4e00-\u9fa5]/g) || []).length
@@ -489,8 +610,41 @@ app.post('/api/generate', async (req, res) => {
     let finalPositive, finalNegative, finalSeed, finalSteps, finalCfg, finalWidth, finalHeight
     let enhanced = null // 存储完整的 LLM 增强结果（包括 RAG 信息）
 
-    if (description) {
-      // 新协议：通过 LLM 增强
+    // Flux 模式不使用 LLM 增强，直接使用用户输入
+    if (workflowType === 'flux') {
+      if (!description) {
+        return res.status(400).json({ success: false, message: '请提供图片描述' })
+      }
+      finalPositive = description
+      finalNegative = "blurry, low quality, distorted, ugly, bad anatomy, deformed, poorly drawn"
+      finalSteps = 4  // Flux API 固定使用 4 步
+      finalCfg = 5
+      finalSeed = Math.floor(Math.random() * 999999999999)
+
+      // 处理分辨率/比例
+      if (resolution) {
+        // 检查是否是比例格式（包含冒号）
+        if (resolution.includes(':')) {
+          // 比例格式，转换为尺寸
+          const sizeStr = convertAspectRatioToSize(resolution)
+          const [w, h] = sizeStr.split('x').map(Number)
+          finalWidth = w
+          finalHeight = h
+          console.log(`🎨 Flux 模式：比例 ${resolution} → 尺寸 ${finalWidth}x${finalHeight}`)
+        } else {
+          // 尺寸格式，直接使用
+          const [w, h] = resolution.split('x').map(Number)
+          finalWidth = w
+          finalHeight = h
+          console.log(`🎨 Flux 模式：使用尺寸 ${finalWidth}x${finalHeight}`)
+        }
+      } else {
+        finalWidth = width || 1024
+        finalHeight = height || 1024
+      }
+      console.log(`🎨 Flux 模式：直接使用用户描述（${finalPositive.length} 字符）`)
+    } else if (description) {
+      // 其他模式：通过 LLM 增强
       try {
         enhanced = await enhancePrompt(description)
         finalPositive = enhanced.positive
@@ -498,8 +652,22 @@ app.post('/api/generate', async (req, res) => {
         finalSteps = enhanced.steps || 20
         finalCfg = enhanced.cfg || 5
         finalSeed = enhanced.seed || Math.floor(Math.random() * 999999999999)
+
+        // 处理分辨率/比例
         if (resolution) {
-          [finalWidth, finalHeight] = resolution.split('x').map(Number)
+          // 检查是否是比例格式（包含冒号）
+          if (resolution.includes(':')) {
+            // 比例格式，转换为尺寸
+            const sizeStr = convertAspectRatioToSize(resolution)
+            const [w, h] = sizeStr.split('x').map(Number)
+            finalWidth = w
+            finalHeight = h
+          } else {
+            // 尺寸格式，直接使用
+            const [w, h] = resolution.split('x').map(Number)
+            finalWidth = w
+            finalHeight = h
+          }
         } else {
           finalWidth = width || 1024
           finalHeight = height || 1024
@@ -519,8 +687,22 @@ app.post('/api/generate', async (req, res) => {
         finalSteps = 20
         finalCfg = 5
         finalSeed = Math.floor(Math.random() * 999999999999)
+
+        // 处理分辨率/比例
         if (resolution) {
-          [finalWidth, finalHeight] = resolution.split('x').map(Number)
+          // 检查是否是比例格式（包含冒号）
+          if (resolution.includes(':')) {
+            // 比例格式，转换为尺寸
+            const sizeStr = convertAspectRatioToSize(resolution)
+            const [w, h] = sizeStr.split('x').map(Number)
+            finalWidth = w
+            finalHeight = h
+          } else {
+            // 尺寸格式，直接使用
+            const [w, h] = resolution.split('x').map(Number)
+            finalWidth = w
+            finalHeight = h
+          }
         } else {
           finalWidth = width || 1024
           finalHeight = height || 1024
@@ -541,72 +723,111 @@ app.post('/api/generate', async (req, res) => {
     }
 
     // 根据工作流类型选择工作流（默认：SDXL）
-    const selectedWorkflow = workflowType === 'quality' ? OMNIGEN2_WORKFLOW : SDXL_WORKFLOW
-    const workflow = JSON.parse(JSON.stringify(selectedWorkflow))
-    const workflowName = workflowType === 'quality' ? 'OmniGen2（质量）' : 'SDXL（快速）'
-    console.log(`🎨 使用工作流：${workflowName}`)
+    let prompt_id = null
+    let workflowName = ''
 
-    // 填充参数（根据工作流类型分别处理）
-    if (workflowType === 'quality') {
-      // OmniGen2 节点映射
-      workflow["42:21"]["inputs"]["noise_seed"] = finalSeed
-      workflow["42:23"]["inputs"]["steps"] = finalSteps
-      workflow["42:27"]["inputs"]["cfg_conds"] = finalCfg
-      workflow["42:11"]["inputs"]["width"] = finalWidth
-      workflow["42:11"]["inputs"]["height"] = finalHeight
-      workflow["42:6"]["inputs"]["text"] = finalPositive
-      workflow["42:7"]["inputs"]["text"] = finalNegative
-    } else {
-      // SDXL 节点映射
-      workflow["3"]["inputs"]["seed"] = finalSeed
-      workflow["3"]["inputs"]["steps"] = finalSteps
-      workflow["3"]["inputs"]["cfg"] = finalCfg
-      workflow["5"]["inputs"]["width"] = finalWidth
-      workflow["5"]["inputs"]["height"] = finalHeight
-      workflow["6"]["inputs"]["text"] = finalPositive
-      workflow["7"]["inputs"]["text"] = finalNegative
-    }
+    if (workflowType === 'flux') {
+      // Flux.2-klein-4b（人气模式）- 直接调用 NVIDIA API
+      workflowName = 'Flux.2-klein-4b（人气）'
+      console.log(`🎨 使用工作流：${workflowName}`)
 
-    console.log(`📤 收到 星澜智能绘图 请求：`)
-    console.log(JSON.stringify(req.body, null, 2))
+      // 生成唯一的 prompt_id
+      prompt_id = `flux_${Date.now()}_${Math.floor(Math.random() * 10000)}`
 
-    // 提交任务到ComfyUI
-    const postPrompt = () => {
-      return new Promise((resolve, reject) => {
-        const postData = JSON.stringify({ prompt: workflow })
-        const apiUrl = new URL('/prompt', COMFYUI_SERVER)
-        const options = {
-          hostname: apiUrl.hostname,
-          port: apiUrl.port || 443,
-          path: apiUrl.pathname,
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Content-Length': Buffer.byteLength(postData)
+      // 调用 Flux API（异步执行，不阻塞响应）
+      callFluxAPI(finalPositive, finalWidth, finalHeight, finalSeed)
+        .then(result => {
+          console.log(`✅ Flux API 调用成功：${prompt_id}`)
+          // 将结果保存到临时文件供状态查询
+          const fluxResults = loadFluxResults()
+          fluxResults[prompt_id] = {
+            status: 'completed',
+            completed: true,
+            images: result.images || [],
+            result: result
           }
-        }
-
-        const request = https.request(options, (response) => {
-          let data = ''
-          response.on('data', chunk => data += chunk)
-          response.on('end', () => {
-            try {
-              resolve(JSON.parse(data))
-            } catch (e) {
-              reject(new Error('解析响应失败: ' + e.message))
-            }
-          })
+          saveFluxResults(fluxResults)
+        })
+        .catch(err => {
+          console.error(`❌ Flux API 调用失败：${prompt_id}`, err.message)
+          const fluxResults = loadFluxResults()
+          fluxResults[prompt_id] = {
+            status: 'error',
+            completed: false,
+            error: err.message
+          }
+          saveFluxResults(fluxResults)
         })
 
-        request.on('error', reject)
-        request.write(postData)
-        request.end()
-      })
-    }
+    } else {
+      // SDXL 或 OmniGen2 - 使用 ComfyUI 工作流
+      const selectedWorkflow = workflowType === 'quality' ? OMNIGEN2_WORKFLOW : SDXL_WORKFLOW
+      const workflow = JSON.parse(JSON.stringify(selectedWorkflow))
+      workflowName = workflowType === 'quality' ? 'OmniGen2（质量）' : 'SDXL（快速）'
+      console.log(`🎨 使用工作流：${workflowName}`)
 
-    const promptResult = await postPrompt()
-    const prompt_id = promptResult.prompt_id
-    console.log(`✅ 任务提交成功：${prompt_id}`)
+      // 填充参数（根据工作流类型分别处理）
+      if (workflowType === 'quality') {
+        // OmniGen2 节点映射
+        workflow["42:21"]["inputs"]["noise_seed"] = finalSeed
+        workflow["42:23"]["inputs"]["steps"] = finalSteps
+        workflow["42:27"]["inputs"]["cfg_conds"] = finalCfg
+        workflow["42:11"]["inputs"]["width"] = finalWidth
+        workflow["42:11"]["inputs"]["height"] = finalHeight
+        workflow["42:6"]["inputs"]["text"] = finalPositive
+        workflow["42:7"]["inputs"]["text"] = finalNegative
+      } else {
+        // SDXL 节点映射
+        workflow["3"]["inputs"]["seed"] = finalSeed
+        workflow["3"]["inputs"]["steps"] = finalSteps
+        workflow["3"]["inputs"]["cfg"] = finalCfg
+        workflow["5"]["inputs"]["width"] = finalWidth
+        workflow["5"]["inputs"]["height"] = finalHeight
+        workflow["6"]["inputs"]["text"] = finalPositive
+        workflow["7"]["inputs"]["text"] = finalNegative
+      }
+
+      console.log(`📤 收到 星澜智能绘图 请求：`)
+      console.log(JSON.stringify(req.body, null, 2))
+
+      // 提交任务到ComfyUI
+      const postPrompt = () => {
+        return new Promise((resolve, reject) => {
+          const postData = JSON.stringify({ prompt: workflow })
+          const apiUrl = new URL('/prompt', COMFYUI_SERVER)
+          const options = {
+            hostname: apiUrl.hostname,
+            port: apiUrl.port || 443,
+            path: apiUrl.pathname,
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Content-Length': Buffer.byteLength(postData)
+            }
+          }
+
+          const request = https.request(options, (response) => {
+            let data = ''
+            response.on('data', chunk => data += chunk)
+            response.on('end', () => {
+              try {
+                resolve(JSON.parse(data))
+              } catch (e) {
+                reject(new Error('解析响应失败: ' + e.message))
+              }
+            })
+          })
+
+          request.on('error', reject)
+          request.write(postData)
+          request.end()
+        })
+      }
+
+      const promptResult = await postPrompt()
+      prompt_id = promptResult.prompt_id
+      console.log(`✅ 任务提交成功：${prompt_id}`)
+    }
 
     // 记录任务元数据（用于进度学习）
     progressLearner.startTask(prompt_id, finalWidth, finalHeight)
@@ -647,6 +868,71 @@ app.get('/api/status', async (req, res) => {
       return res.status(400).json({ success: false, message: '请提供 prompt_id' })
     }
 
+    // 检查是否是 Flux 任务（以 flux_ 开头）
+    if (prompt_id.startsWith('flux_')) {
+      const fluxResults = loadFluxResults()
+      const fluxTask = fluxResults[prompt_id]
+
+      if (!fluxTask) {
+        // 任务还在处理中
+        return res.json({
+          success: true,
+          status: 'pending',
+          completed: false,
+          progress: 50, // Flux API 是同步的，但为了兼容前端显示，给一个中间进度
+          estimatedDuration: 30 // Flux API 通常很快
+        })
+      }
+
+      if (fluxTask.status === 'error') {
+        return res.json({
+          success: true,
+          status: 'error',
+          completed: false,
+          error: fluxTask.error
+        })
+      }
+
+      if (fluxTask.completed && fluxTask.result) {
+        // Flux API 返回的图片格式需要转换
+        let images = []
+        if (fluxTask.result.images && Array.isArray(fluxTask.result.images)) {
+          images = fluxTask.result.images.map((img, idx) => ({
+            filename: `flux_${prompt_id}_${idx}.png`,
+            url: img.url, // Flux API 返回的 data URL
+            width: img.width || 1024,
+            height: img.height || 1024
+          }))
+        } else if (fluxTask.result.image) {
+          // 单张图片
+          images = [{
+            filename: `flux_${prompt_id}.png`,
+            url: fluxTask.result.image,
+            width: fluxTask.result.width || 1024,
+            height: fluxTask.result.height || 1024
+          }]
+        }
+
+        return res.json({
+          success: true,
+          status: 'completed',
+          completed: true,
+          progress: 100,
+          images
+        })
+      }
+
+      // 默认返回处理中
+      return res.json({
+        success: true,
+        status: 'pending',
+        completed: false,
+        progress: 50,
+        estimatedDuration: 30
+      })
+    }
+
+    // 原有的 ComfyUI 任务查询逻辑
     const history = await pollHistory(prompt_id)
 
     if (!history[prompt_id]) {

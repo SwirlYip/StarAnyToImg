@@ -2,4 +2,7 @@ node_modules/
 npm-debug.log
 .DS_Store
 comfyui-web/learning.json
+learning.json
+flux-results.json
 *.log
+test-*.js

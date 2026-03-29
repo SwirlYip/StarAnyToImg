@@ -9,11 +9,514 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', Arial, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #050505;
+      background-attachment: fixed;
       min-height: 100vh;
       padding: 20px;
+      color: rgba(255, 255, 255, 0.8);
     }
     #app { max-width: 1400px; margin: 0 auto; }
+
+    /* App Container */
+    .app-container {
+      position: relative;
+      min-height: 100vh;
+      z-index: 1;
+    }
+
+    /* Cyber Grid Background */
+    .cyber-grid {
+      position: fixed;
+      inset: 0;
+      opacity: 0.6;
+      pointer-events: none;
+      z-index: 0;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1), transparent 88%);
+    }
+
+    /* Background Overlay */
+    .background-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(circle at 15% 10%, rgba(0, 242, 255, 0.12), transparent 26%),
+        radial-gradient(circle at 85% 12%, rgba(112, 0, 255, 0.16), transparent 30%),
+        radial-gradient(circle at 50% 100%, rgba(255, 255, 255, 0.04), transparent 35%);
+    }
+
+    /* Text Gradient */
+    .text-gradient {
+      background: linear-gradient(92deg, #00f2ff 0%, #7f72ff 50%, #7000ff 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    /* Glass Cards */
+    .config-card,
+    .status-card,
+    .error-card,
+    .result-card {
+      background: linear-gradient(180deg, rgba(18, 18, 18, 0.96), rgba(12, 12, 12, 0.98));
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 28px;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.34);
+      transition: all 0.3s ease;
+    }
+
+    .config-card:hover,
+    .result-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 32px 100px rgba(0, 0, 0, 0.45);
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 32px 0;
+      background: linear-gradient(180deg, rgba(18, 18, 18, 0.88), rgba(10, 10, 10, 0.82));
+      backdrop-filter: blur(20px);
+      border-radius: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+    }
+
+    .header h1 {
+      font-size: 56px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      color: rgba(255, 255, 255, 0.58);
+      font-weight: 400;
+      letter-spacing: 0.5px;
+    }
+
+    /* Card Header */
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .card-badge {
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.05);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Form Elements */
+    .el-form-item {
+      margin-bottom: 24px;
+    }
+
+    .el-form-item__label {
+      color: rgba(255, 255, 255, 0.72);
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .el-textarea__inner,
+    .el-input__wrapper,
+    .el-select {
+      background: #121212 !important;
+      border-radius: 12px !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      color: rgba(255, 255, 255, 0.8) !important;
+      transition: all 0.3s ease;
+    }
+
+    .el-textarea__inner:focus,
+    .el-input__wrapper:hover,
+    .el-select:hover {
+      border-color: rgba(0, 242, 255, 0.3) !important;
+      box-shadow: 0 0 0 3px rgba(0, 242, 255, 0.1);
+    }
+
+    .el-textarea__inner::placeholder,
+    .el-input__inner::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Radio Buttons */
+    .el-radio-group {
+      display: flex;
+      gap: 12px;
+    }
+
+    .el-radio.el-radio--border {
+      border-radius: 10px;
+      padding: 10px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.03);
+      color: rgba(255, 255, 255, 0.7);
+      transition: all 0.3s ease;
+    }
+
+    .el-radio.el-radio--border:hover {
+      border-color: rgba(0, 242, 255, 0.3);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .el-radio.is-checked.el-radio--border {
+      background: linear-gradient(135deg, rgba(0, 242, 255, 0.2), rgba(112, 0, 255, 0.2));
+      border-color: rgba(0, 242, 255, 0.4);
+      color: #fff;
+    }
+
+    /* Buttons */
+    .el-button--primary {
+      background: linear-gradient(135deg, #00F2FF, #7000FF);
+      border: none;
+      color: white;
+      font-weight: 700;
+      font-size: 16px;
+      border-radius: 14px;
+      height: 56px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 20px rgba(0, 242, 255, 0.3);
+    }
+
+    .el-button--primary:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(0, 242, 255, 0.5);
+    }
+
+    .el-button--primary:active {
+      transform: translateY(-1px);
+    }
+
+    .el-button:not(.el-button--primary) {
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.05);
+      color: rgba(255, 255, 255, 0.8);
+      transition: all 0.3s ease;
+    }
+
+    .el-button:not(.el-button--primary):hover {
+      border-color: rgba(0, 242, 255, 0.3);
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-2px);
+    }
+
+    /* Status Card */
+    .status-card {
+      margin-top: 24px;
+    }
+
+    .el-progress__text {
+      color: #00F2FF;
+      font-weight: 700;
+    }
+
+    .el-progress-bar__outer {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .el-progress-bar__inner {
+      background: linear-gradient(90deg, #00F2FF, #7000FF);
+    }
+
+    /* Error Card */
+    .error-card {
+      margin-top: 24px;
+      border-left: 5px solid #FF5F57;
+    }
+
+    .error-card [class*=" el-icon-"] {
+      color: #FF5F57;
+    }
+
+    /* Image Grid */
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 24px;
+      margin-top: 28px;
+    }
+
+    .image-item,
+    .history-item {
+      background: linear-gradient(180deg, rgba(18, 18, 18, 0.96), rgba(12, 12, 12, 0.98));
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+
+    .image-item:hover,
+    .history-item:hover {
+      transform: translateY(-8px) scale(1.02);
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .image-wrapper {
+      position: relative;
+      padding-top: 100%;
+      overflow: hidden;
+      background: #0F0F10;
+    }
+
+    .image-wrapper img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .image-item:hover .image-wrapper img,
+    .history-item:hover .image-wrapper img {
+      transform: scale(1.1) rotate(1deg);
+    }
+
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(0, 242, 255, 0.8), rgba(112, 0, 255, 0.8));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .image-item:hover .overlay,
+    .history-item:hover .overlay {
+      opacity: 1;
+    }
+
+    .image-wrapper .el-button--circle {
+      transform: scale(0.8);
+      border: none;
+      background: white;
+    }
+
+    .image-item:hover .el-button--circle,
+    .history-item:hover .el-button--circle {
+      transform: scale(1);
+    }
+
+    .image-meta,
+    .history-meta {
+      padding: 16px;
+      background: linear-gradient(180deg, rgba(18, 18, 18, 0.96), rgba(12, 12, 12, 0.98));
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .filename {
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 600;
+      font-size: 13px;
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .size {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 12px;
+    }
+
+    /* History Meta */
+    .history-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .history-meta .time {
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .history-meta .description {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 12px;
+      max-height: 38px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      line-height: 1.5;
+    }
+
+    /* Error Placeholder */
+    .error-placeholder {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 13px;
+      background: linear-gradient(135deg, rgba(18, 18, 18, 0.96), rgba(12, 12, 12, 0.98));
+    }
+
+    /* Loading */
+    .loading-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 480px;
+    }
+
+    .loading-animation {
+      text-align: center;
+    }
+
+    .spinner {
+      width: 80px;
+      height: 80px;
+      border: 4px solid rgba(0, 242, 255, 0.1);
+      border-top-color: #00F2FF;
+      border-radius: 50%;
+      animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      margin: 0 auto 24px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading-animation p {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 36px 24px;
+      margin-top: 48px;
+    }
+
+    .incognito-notice {
+      display: inline-flex;
+      align-items: center;
+      margin-bottom: 16px;
+      padding: 12px 20px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      color: rgba(255, 255, 255, 0.7);
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 500;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .incognito-notice .el-icon {
+      margin-right: 8px;
+    }
+
+    .copyright {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0.3px;
+    }
+
+    /* Empty State */
+    .el-empty__description {
+      color: rgba(255, 255, 255, 0.5);
+      font-weight: 500;
+    }
+
+    /* Dialog */
+    .el-dialog {
+      background: linear-gradient(180deg, #131313 0%, #0D0D0D 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 28px;
+      box-shadow: 0 0 100px rgba(0, 0, 0, 0.6);
+    }
+
+    .el-dialog__title {
+      color: #fff;
+    }
+
+    .el-dialog__body {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #070707;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(0, 242, 255, 0.58), rgba(112, 0, 255, 0.62));
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      body {
+        padding: 16px;
+      }
+
+      .header {
+        margin-bottom: 24px;
+        padding: 24px 0;
+      }
+
+      .header h1 {
+        font-size: 36px;
+      }
+
+      .subtitle {
+        font-size: 14px;
+      }
+
+      .image-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 16px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -33,7 +536,7 @@
           steps: 20, // 已废弃，由 LLM 生成
           cfg: 5, // 已废弃，由 LLM 生成
           resolution: '1024x1024',
-          workflow: 'sdxl' // 'sdxl' (快速) 或 'omnigen2' (质量)
+          workflow: 'sdxl' // 'sdxl' (快速), 'omnigen2' (质量), 'flux' (人气)
         })
 
         const generating = ref(false)
@@ -218,6 +721,51 @@
         resumeTask()
         historyImages.value = loadHistory()
 
+        // 监听 workflow 变化，自动调整分辨率
+        Vue.watch(() => form.workflow, (newWorkflow) => {
+          if (newWorkflow === 'flux') {
+            form.resolution = '1024x1024' // Flux 默认分辨率
+          } else if (form.resolution === '1328x800' || form.resolution === '800x1328' ||
+                     form.resolution === '1104x944' || form.resolution === '944x1104' ||
+                     form.resolution === '1248x832' || form.resolution === '832x1248') {
+            // 如果当前分辨率是 Flux 专用的，切换到 SDXL/OmniGen2 默认分辨率
+            form.resolution = '1024x1024'
+          }
+        })
+
+        // 根据工作流类型返回分辨率选项
+        const resolutionOptions = Vue.computed(() => {
+          if (form.workflow === 'flux') {
+            // Flux 支持的比例（只显示比例，不显示具体分辨率）
+            return [
+              { label: '1:1', value: '1024x1024' },
+              { label: '16:9', value: '1328x800' },
+              { label: '9:16', value: '800x1328' },
+              { label: '5:4', value: '1104x944' },
+              { label: '4:5', value: '944x1104' },
+              { label: '3:2', value: '1248x832' },
+              { label: '2:3', value: '832x1248' }
+            ]
+          } else {
+            // SDXL 和 OmniGen2 支持的比例
+            return [
+              { label: '1:1', options: [
+                { label: '512×512', value: '512x512' },
+                { label: '1024×1024 (推荐)', value: '1024x1024' }
+              ]},
+              { label: '4:3', options: [
+                { label: '768×1024', value: '768x1024' },
+                { label: '1024×768', value: '1024x768' }
+              ]},
+              { label: '16:9', options: [
+                { label: '768×432', value: '768x432' },
+                { label: '1024×576', value: '1024x576' },
+                { label: '1920×1080', value: '1920x1080' }
+              ]}
+            ]
+          }
+        })
+
         const generate = async () => {
           if (!form.positive.trim()) {
             ElementPlus.ElMessage.warning('请描述你想生成的图片')
@@ -239,7 +787,7 @@
             const payload = {
               description: form.positive,
               resolution: form.resolution,
-              workflow: form.workflow === 'omnigen2' ? 'quality' : 'sdxl'
+              workflow: form.workflow === 'omnigen2' ? 'quality' : (form.workflow === 'flux' ? 'flux' : 'sdxl')
             }
 
             const submitResp = await fetch('/api/generate', {
@@ -348,13 +896,17 @@
           taskError,
           clearTaskState,
           historyImages,
-          historyVisible
+          historyVisible,
+          resolutionOptions
         }
       },
       template: `
         <div class="app-container">
+          <div class="cyber-grid"></div>
+          <div class="background-overlay"></div>
+
           <header class="header">
-            <h1>✨ 星澜智能绘图</h1>
+            <h1>✨ <span class="text-gradient">星澜智能绘图</span></h1>
             <p class="subtitle">用 AI 激活你的创意想象</p>
           </header>
 
@@ -374,20 +926,15 @@
                   </el-form-item>
 
                   <el-form-item label="分辨率">
-                    <el-select v-model="form.resolution" placeholder="选择分辨率" style="width: 100%">
-                      <el-option-group label="1:1">
-                        <el-option label="512×512" value="512x512" />
-                        <el-option label="1024×1024 (推荐)" value="1024x1024" />
-                      </el-option-group>
-                      <el-option-group label="4:3">
-                        <el-option label="768×1024" value="768x1024" />
-                        <el-option label="1024×768" value="1024x768" />
-                      </el-option-group>
-                      <el-option-group label="16:9">
-                        <el-option label="768×432" value="768x432" />
-                        <el-option label="1024×576" value="1024x576" />
-                        <el-option label="1920×1080" value="1920x1080" />
-                      </el-option-group>
+                    <el-select v-model="form.resolution" placeholder="选择分辨率" style="width: 100%" :key="form.workflow">
+                      <template v-if="form.workflow === 'flux'">
+                        <el-option v-for="option in resolutionOptions" :key="option.value" :label="option.label" :value="option.value" />
+                      </template>
+                      <template v-else>
+                        <el-option-group v-for="group in resolutionOptions" :key="group.label" :label="group.label">
+                          <el-option v-for="option in group.options" :key="option.value" :label="option.label" :value="option.value" />
+                        </el-option-group>
+                      </template>
                     </el-select>
                   </el-form-item>
 
@@ -395,6 +942,7 @@
                     <el-radio-group v-model="form.workflow">
                       <el-radio label="sdxl">快速</el-radio>
                       <el-radio label="omnigen2">质量</el-radio>
+                      <el-radio label="flux">人气</el-radio>
                     </el-radio-group>
                   </el-form-item>
                 </el-form>
@@ -511,469 +1059,5 @@
     app.mount('#app')
   </script>
 
-  <style scoped>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      background-attachment: fixed;
-      min-height: 100vh;
-      padding: 24px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-    }
-
-    #app {
-      max-width: 1440px;
-      margin: 0 auto;
-    }
-
-    /* 玻璃态效果 */
-    .config-card,
-    .status-card,
-    .error-card,
-    .result-card {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 20px;
-      box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.1),
-        inset 0 1px 1px rgba(255, 255, 255, 0.6);
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .config-card:hover,
-    .result-card:hover {
-      transform: translateY(-4px);
-      box-shadow:
-        0 12px 40px rgba(0, 0, 0, 0.15),
-        inset 0 1px 1px rgba(255, 255, 255, 0.6);
-    }
-
-    /* Header */
-    .header {
-      text-align: center;
-      margin-bottom: 40px;
-      padding: 32px 0;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      border-radius: 24px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .header h1 {
-      font-size: 56px;
-      font-weight: 800;
-      background: linear-gradient(135deg, #fff 0%, #f0d4ff 50%, #fff 100%);
-      background-size: 200% auto;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 12px;
-      letter-spacing: -0.5px;
-      animation: shimmer 3s linear infinite;
-    }
-
-    @keyframes shimmer {
-      to {
-        background-position: 200% center;
-      }
-    }
-
-    .subtitle {
-      font-size: 18px;
-      color: rgba(255, 255, 255, 0.85);
-      font-weight: 400;
-      letter-spacing: 0.5px;
-    }
-
-    /* Card Header */
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .card-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: #333;
-    }
-
-    .card-badge {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-    }
-
-    /* Result Header */
-    .result-card .result-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .result-card .result-header span {
-      font-size: 18px;
-      font-weight: 700;
-      color: #333;
-    }
-
-    /* Form Elements */
-    .el-form-item {
-      margin-bottom: 28px;
-    }
-
-    .el-form-item__label {
-      color: #555;
-      font-weight: 600;
-      font-size: 14px;
-    }
-
-    .el-textarea__inner,
-    .el-input__wrapper,
-    .el-select {
-      border-radius: 12px !important;
-      border: 2px solid #e8e8e8;
-      transition: all 0.3s ease;
-    }
-
-    .el-textarea__inner:focus,
-    .el-input__wrapper:hover,
-    .el-select:hover {
-      border-color: #667eea !important;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    /* Radio Buttons */
-    .el-radio-group {
-      display: flex;
-      gap: 12px;
-    }
-
-    .el-radio.el-radio--border {
-      border-radius: 10px;
-      padding: 10px 20px;
-      border: 2px solid #e8e8e8;
-      transition: all 0.3s ease;
-    }
-
-    .el-radio.el-radio--border:hover {
-      border-color: #667eea;
-      transform: translateY(-1px);
-    }
-
-    .el-radio.is-checked.el-radio--border {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      border-color: transparent;
-      color: white;
-    }
-
-    /* Actions */
-    .actions {
-      margin-top: 36px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .el-button--primary {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      border: none;
-      color: white;
-      font-weight: 700;
-      font-size: 16px;
-      border-radius: 14px;
-      height: 56px;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-    }
-
-    .el-button--primary:hover:not(:disabled) {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
-    }
-
-    .el-button--primary:active {
-      transform: translateY(-1px);
-    }
-
-    .el-button:not(.el-button--primary) {
-      border-radius: 12px;
-      border: 2px solid rgba(255, 255, 255, 0.4);
-      background: rgba(255, 255, 255, 0.9);
-      transition: all 0.3s ease;
-    }
-
-    .el-button:not(.el-button--primary):hover {
-      border-color: #667eea;
-      transform: translateY(-2px);
-    }
-
-    /* Status Card */
-    .status-card {
-      margin-top: 24px;
-    }
-
-    .el-progress__text {
-      color: #667eea;
-      font-weight: 700;
-    }
-
-    /* Error Card */
-    .error-card {
-      margin-top: 24px;
-      border-left: 5px solid #f56565;
-    }
-
-    .error-card [class*=" el-icon-"] {
-      color: #f56565;
-    }
-
-    /* Image Grid */
-    .image-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 24px;
-      margin-top: 28px;
-    }
-
-    .image-item,
-    .history-item {
-      background: white;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      cursor: pointer;
-    }
-
-    .image-item:hover,
-    .history-item:hover {
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-    }
-
-    .image-wrapper {
-      position: relative;
-      padding-top: 100%;
-      overflow: hidden;
-      background: #f7f7f7;
-    }
-
-    .image-wrapper img {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .image-item:hover .image-wrapper img,
-    .history-item:hover .image-wrapper img {
-      transform: scale(1.1) rotate(1deg);
-    }
-
-    .overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(135deg, rgba(102, 126, 234, 0.8), rgba(118, 75, 162, 0.8));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .image-item:hover .overlay,
-    .history-item:hover .overlay {
-      opacity: 1;
-    }
-
-    .image-wrapper .el-button--circle {
-      transform: scale(0.8);
-      border: none;
-      background: white;
-    }
-
-    .image-item:hover .el-button--circle,
-    .history-item:hover .el-button--circle {
-      transform: scale(1);
-    }
-
-    .image-meta,
-    .history-meta {
-      padding: 16px;
-      background: white;
-      border-top: 1px solid #f0f0f0;
-    }
-
-    .filename {
-      color: #333;
-      font-weight: 600;
-      font-size: 13px;
-      max-width: 140px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .size {
-      color: #999;
-      font-size: 12px;
-    }
-
-    /* History Meta */
-    .history-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .history-meta .time {
-      color: #999;
-      font-size: 11px;
-      font-weight: 500;
-    }
-
-    .history-meta .description {
-      color: #555;
-      font-size: 12px;
-      max-height: 38px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      line-height: 1.5;
-    }
-
-    /* Error Placeholder */
-    .error-placeholder {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #ccc;
-      font-size: 13px;
-      background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
-    }
-
-    /* Loading */
-    .loading-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 480px;
-    }
-
-    .loading-animation {
-      text-align: center;
-    }
-
-    .spinner {
-      width: 80px;
-      height: 80px;
-      border: 4px solid rgba(102, 126, 234, 0.1);
-      border-top-color: #667eea;
-      border-radius: 50%;
-      animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-      margin: 0 auto 24px;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    .loading-animation p {
-      color: rgba(255, 255, 255, 0.9);
-      font-size: 16px;
-      font-weight: 500;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Footer */
-    .footer {
-      text-align: center;
-      padding: 36px 24px;
-      margin-top: 48px;
-    }
-
-    .incognito-notice {
-      display: inline-flex;
-      align-items: center;
-      margin-bottom: 16px;
-      padding: 12px 20px;
-      background: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(10px);
-      color: rgba(255, 255, 255, 0.9);
-      border-radius: 12px;
-      font-size: 13px;
-      font-weight: 500;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .incognito-notice .el-icon {
-      margin-right: 8px;
-    }
-
-    .copyright {
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 13px;
-      font-weight: 400;
-      letter-spacing: 0.3px;
-    }
-
-    /* Empty State */
-    .el-empty__description {
-      color: #999;
-      font-weight: 500;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      body {
-        padding: 16px;
-      }
-
-      .header {
-        margin-bottom: 24px;
-        padding: 24px 0;
-      }
-
-      .header h1 {
-        font-size: 36px;
-      }
-
-      .subtitle {
-        font-size: 14px;
-      }
-
-      .image-grid {
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 16px;
-      }
-    }
-  </style>
 </body>
 </html>
